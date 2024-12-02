@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Design</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Inria Serif', serif; /* Apply Inria Serif to the body */
+            background-color: #e0f7ff; /* Light blue background */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container Styles */
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%; /* Full-width container */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Box Styles */
+        .box {
+            background-color: #b3e6ff; /* Light blue background for boxes */
+            border-radius: 20px; /* Rounded corners */
+            padding: 20px;
+            flex: 1; /* Make both boxes take up equal space */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            min-height: 80vh; /* Ensure a consistent height */
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+
+        .left-box {
+            /* Styling specific to the left box if needed */
+        }
+
+        .right-box {
+            text-align: center;
+        }
+
+        /* Title Styles */
+        .title {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Input Fields */
+        .form-input {
+            display: block;
+            width: 90%;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background-color: #d6f0ff;
+            font-family: 'Inria Serif', serif;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-input.textarea {
+            height: 150px; /* Taller for the text area */
+            resize: none; /* Prevent resizing */
+        }
+
+        /* Button Container */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Space between buttons */
+            margin-top: 20px;
+        }
+
+        /* Attachment Buttons */
+        .attachment-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #d6f0ff; /* Light blue button color */
+            border: none; /* Remove border */
+            border-radius: 10px; /* Rounded corners */
+            padding: 10px 20px; /* Padding for size */
+            font-size: 1em; /* Font size */
+            font-family: 'Inria Serif', serif; /* Apply Inria Serif font to buttons */
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Button shadow */
+            transition: all 0.3s ease; /* Smooth transition */
+        }
+
+        button:hover {
+            background-color: #9dd7ff; /* Darker blue on hover */
+            transform: translateY(-2px); /* Lift button on hover */
+        }
+
+        button:active {
+            transform: translateY(0); /* Reset position when clicked */
+        }
+
+        /* Responsive Design for Mobile Devices */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Stack boxes vertically */
+            }
+
+            .right-box {
+                order: 1; /* Right box goes first */
+            }
+
+            .left-box {
+                order: 2; /* Left box moves below the right box */
+            }
+
+            .box {
+                min-height: auto; /* Adjust height to fit content */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section -->
+        <div class="box left-box">
+            <!-- Content for the left section can go here -->
+        </div>
+        <!-- Right Section -->
+        <div class="box right-box">
+            <h2 class="title">Categoria del testo</h2>
+            <div class="buttons">
+                <button>Liturgico</button>
+                <button>Canto</button>
+                <button>Altro</button>
+            </div>
+            <input type="text" class="form-input" placeholder="Titolo">
+            <textarea class="form-input textarea" placeholder="Testo......."></textarea>
+            <input type="text" class="form-input" placeholder="Note">
+            <div class="attachment-buttons">
+                <button>Allega foto</button>
+                <button>Allega audio</button>
+                <button>Allega doc</button>
+            </div>
+            <button style="margin-top: 20px;">Salva</button>
+        </div>
+    </div>
+</body>
+</html>

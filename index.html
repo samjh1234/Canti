@@ -15,16 +15,19 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh; /* Full viewport height */
         }
 
         /* Container Styles */
         .container {
             display: flex;
             gap: 20px;
-            width: 100%; /* Full-width container */
+            width: 95%; /* Full-width container with padding */
+            max-width: 1200px; /* Limit container width for large screens */
             padding: 20px;
             box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
         }
 
         /* Box Styles */
@@ -32,10 +35,13 @@
             background-color: #b3e6ff; /* Light blue background for boxes */
             border-radius: 20px; /* Rounded corners */
             padding: 20px;
-            flex: 1; /* Make both boxes take up equal space */
+            width: 48%; /* Each box takes half the container's width */
+            min-height: 600px; /* Adjusted height for the boxes */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-            min-height: 80vh; /* Ensure a consistent height */
             box-sizing: border-box; /* Include padding in width/height */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .left-box {
@@ -48,7 +54,7 @@
         /* Text Display Area */
         .text-display {
             width: 90%;
-            height: 150px;
+            height: 350px; /* Fixed height for the text display */
             background-color: #d6f0ff;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -63,16 +69,16 @@
 
         /* Audio and Notes Section */
         .audio-notes-container {
+            width: 90%;
             display: flex;
             gap: 20px;
-            width: 90%;
             margin-top: 20px;
-            justify-content: center;
         }
 
-        .audio-player, .notes-display {
+        .audio-player,
+        .notes-display {
             flex: 1;
-            height: 50px;
+            height: 100px; /* Fixed height for both audio and notes display */
             background-color: #c4d9e9;
             border-radius: 10px;
             display: flex;
@@ -90,7 +96,6 @@
             margin-top: 20px;
         }
 
-        /* Button Styles */
         button {
             background-color: #d6f0ff; /* Light blue button color */
             border: none; /* Remove border */
@@ -168,24 +173,19 @@
                 flex-direction: column; /* Stack boxes vertically */
             }
 
-            .right-box {
-                order: 1; /* Right box goes first */
-            }
-
-            .left-box {
-                order: 2; /* Left box moves below the right box */
-            }
-
             .box {
-                min-height: auto; /* Adjust height to fit content */
+                width: 90%; /* Full width for mobile */
+                min-height: 400px; /* Adjusted height for mobile */
+                margin: 10px auto; /* Center boxes */
             }
 
             .audio-notes-container {
-                flex-direction: column;
+                flex-direction: column; /* Stack audio and notes vertically */
                 gap: 10px;
             }
 
-            .audio-player, .notes-display {
+            .audio-player,
+            .notes-display {
                 width: 100%;
             }
         }

@@ -1,236 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Design</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* General Styles */
-        body {
-            font-family: 'Inria Serif', serif; /* Apply Inria Serif to the body */
-            background-color: #e0f7ff; /* Light blue background */
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* Full viewport height */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Canti & Lyrics</title>
 
-        /* Container Styles */
-        .container {
-            display: flex;
-            gap: 20px;
-            width: 95%; /* Full-width container with padding */
-            max-width: 1200px; /* Limit container width for large screens */
-            padding: 20px;
-            box-sizing: border-box;
-            justify-content: center;
-            align-items: center;
-        }
+  <!-- Link to manifest -->
+  <link rel="manifest" href="manifest.json">
 
-        /* Box Styles */
-        .box {
-            background-color: #b3e6ff; /* Light blue background for boxes */
-            border-radius: 20px; /* Rounded corners */
-            padding: 20px;
-            width: 48%; /* Each box takes half the container's width */
-            min-height: 600px; /* Adjusted height for the boxes */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-            box-sizing: border-box; /* Include padding in width/height */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+  <!-- Inline Styles -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
-        .left-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        /* Text Display Area */
-        .text-display {
-            width: 90%;
-            height: 350px; /* Fixed height for the text display */
-            background-color: #d6f0ff;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1em;
-            color: #555;
-        }
+    body {
+      font-family: 'Inria Serif', serif;
+      background: url('backgroundfo.png') no-repeat center center/cover;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+    }
 
-        /* Audio and Notes Section */
-        .audio-notes-container {
-            width: 90%;
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
+    .container {
+      width: 360px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      justify-content: space-between;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-        .audio-player,
-        .notes-display {
-            flex: 1;
-            height: 100px; /* Fixed height for both audio and notes display */
-            background-color: #c4d9e9;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            font-size: 0.9em;
-            color: #555;
-        }
+    .title {
+      font-size: 2rem;
+      color: white;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
 
-        /* Buttons */
-        .bottom-buttons {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
 
-        button {
-            background-color: #d6f0ff; /* Light blue button color */
-            border: none; /* Remove border */
-            border-radius: 10px; /* Rounded corners */
-            padding: 10px 20px; /* Padding for size */
-            font-size: 1em; /* Font size */
-            font-family: 'Inria Serif', serif; /* Apply Inria Serif font to buttons */
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Button shadow */
-            transition: all 0.3s ease; /* Smooth transition */
-        }
+    .button {
+      flex: 1;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 25px;
+      margin: 0 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-        button:hover {
-            background-color: #9dd7ff;
-            transform: translateY(-2px);
-        }
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+    }
 
-        button:active {
-            transform: translateY(0);
-        }
+    .search-box {
+      width: 100%;
+      margin: 15px 0;
+    }
 
-        /* Input Fields */
-        .form-input {
-            display: block;
-            width: 90%;
-            margin: 10px auto;
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-            background-color: #d6f0ff;
-            font-family: 'Inria Serif', serif;
-            font-size: 1em;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.5);
+      color: black;
+      font-size: 1rem;
+      text-align: center;
+    }
 
-        .form-input.textarea {
-            height: 150px; /* Taller for the text area */
-            resize: none; /* Prevent resizing */
-        }
+    .results-box {
+      width: 100%;
+      height: 75%;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      font-size: 1.2rem;
+      padding: 10px;
+      overflow: hidden;
+    }
 
-        /* Button Container */
-        .buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px; /* Space between buttons */
-            margin-top: 20px;
-        }
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
 
-        /* Attachment Buttons */
-        .attachment-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* Align Save Button in Center */
-        .save-button {
-            display: flex;
-            justify-content: center;
-        }
-
-        /* Center Title */
-        .title {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Responsive Design for Mobile Devices */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column; /* Stack boxes vertically */
-            }
-
-            .box {
-                width: 90%; /* Full width for mobile */
-                min-height: 400px; /* Adjusted height for mobile */
-                margin: 10px auto; /* Center boxes */
-            }
-
-            .audio-notes-container {
-                flex-direction: column; /* Stack audio and notes vertically */
-                gap: 10px;
-            }
-
-            .audio-player,
-            .notes-display {
-                width: 100%;
-            }
-        }
-    </style>
+      .container {
+        margin-top: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Left Section -->
-        <div class="box left-box">
-            <div class="text-display">
-                Testo sarà mostrato qui
-            </div>
-            <div class="audio-notes-container">
-                <div class="audio-player">
-                    HTML voice player qui
-                </div>
-                <div class="notes-display">
-                    Mostra le note qui
-                </div>
-            </div>
-            <div class="bottom-buttons">
-                <button>Allegati</button>
-                <button>Modifica</button>
-            </div>
-        </div>
-        <!-- Right Section -->
-        <div class="box right-box">
-            <h2 class="title">Categoria del testo</h2>
-            <div class="buttons">
-                <button>Liturgico</button>
-                <button>Canto</button>
-                <button>Altro</button>
-            </div>
-            <input type="text" class="form-input" placeholder="Titolo">
-            <textarea class="form-input textarea" placeholder="Testo......."></textarea>
-            <input type="text" class="form-input" placeholder="Note">
-            <div class="attachment-buttons">
-                <button>Allega foto</button>
-                <button>Allega audio</button>
-                <button>Allega doc</button>
-            </div>
-            <div class="save-button">
-                <button style="margin-top: 20px;">Salva</button>
-            </div>
-        </div>
+  <div class="container">
+    <!-- Project Title -->
+    <h1 class="title">Canti & Lyrics</h1>
+    
+    <!-- Buttons -->
+    <div class="button-group">
+      <button class="button">Cerca</button>
+      <button class="button">Aggiungi</button>
     </div>
+  
+    <!-- Search Box -->
+    <div class="search-box">
+      <input type="text" placeholder="Ricerca" class="search-input">
+    </div>
+  
+    <!-- Results Box -->
+    <div class="results-box">
+      <p>Risultati della ricerca</p>
+    </div>
+  </div>
+
+  <!-- Inline Script -->
+  <script>
+    // Ensure the container appears in the middle of the browser viewport
+    window.addEventListener('load', () => {
+        const container = document.querySelector('.container');
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const containerRect = container.getBoundingClientRect();
+        const scrollX = (containerRect.width - viewportWidth) / 2;
+        const scrollY = (containerRect.height - viewportHeight) / 2;
+        window.scrollTo({
+          left: container.offsetLeft - scrollX,
+          top: container.offsetTop - scrollY,
+          behavior: 'auto',
+        });
+    });
+
+    // Example interactivity
+    document.querySelector('.button').addEventListener('click', () => {
+        alert('Button clicked!');
+    });
+
+    // Register the service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  </script>
 </body>
 </html>

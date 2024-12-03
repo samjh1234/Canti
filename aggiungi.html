@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Aggiungi Testo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: #cce7ff; /* Light blue background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: #dff3ff; /* Light background for form */
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #333;
+      text-align: center;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .button {
+      flex: 1;
+      margin: 0 5px;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    .input-group {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .input-label {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-button-group {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .file-button {
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      margin: 0 5px;
+    }
+
+    .file-button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    .save-button {
+      width: 100%;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .save-button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Categoria del testo</div>
+
+    <!-- Button Group -->
+    <div class="button-group">
+      <button class="button">Liturgico</button>
+      <button class="button">Canto</button>
+      <button class="button">Altro</button>
+    </div>
+
+    <!-- Title Input -->
+    <div class="input-group">
+      <input type="text" class="input" placeholder="Titolo">
+    </div>
+
+    <!-- Text Area -->
+    <div class="input-group">
+      <textarea class="textarea" placeholder="Testo ......."></textarea>
+    </div>
+
+    <!-- Notes Input -->
+    <div class="input-group">
+      <input type="text" class="input" placeholder="Note">
+    </div>
+
+    <!-- File Upload Buttons -->
+    <div class="file-button-group">
+      <button class="file-button">Allega foto</button>
+      <button class="file-button">Allega audio</button>
+      <button class="file-button">Allega doc</button>
+    </div>
+
+    <!-- Save Button -->
+    <button class="save-button">Salva</button>
+  </div>
+
+  <script>
+    // Example JavaScript interactivity
+    document.querySelector('.save-button').addEventListener('click', () => {
+      alert('Salvato con successo!');
+    });
+  </script>
+</body>
+</html>

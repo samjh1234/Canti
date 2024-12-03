@@ -6,10 +6,11 @@
   <meta name="theme-color" content="#85C1DC">
   <title>Canti & Lyrics</title>
 
+  <!-- Link to manifest -->
+  <link rel="manifest" href="manifest.json">
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
-  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
-
+  <!-- Inline Styles -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
@@ -23,9 +24,11 @@
       font-family: 'Inria Serif', serif;
       background: url('photos/backgroundfo.png') no-repeat center center/cover;
       height: 100vh;
+      width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: auto;
     }
 
     .container {
@@ -38,6 +41,7 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      justify-content: space-between;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
@@ -54,7 +58,6 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      margin-bottom: 15px;
     }
 
     .button {
@@ -68,6 +71,9 @@
       margin: 0 5px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      text-decoration: none; /* For link buttons */
+      text-align: center;
+      display: inline-block;
     }
 
     .button:hover {
@@ -92,99 +98,100 @@
 
     .results-box {
       width: 100%;
-      height: 75%;
+      height: 40%;
       background: rgba(0, 0, 0, 0.2);
       border-radius: 20px;
       display: flex;
-      flex-direction: column;
-      padding: 10px;
-      overflow-y: auto;
+      justify-content: center;
+      align-items: center;
       color: white;
-      font-size: 1rem;
-    }
-
-    .result-item {
+      text-align: center;
+      font-size: 1.2rem;
       padding: 10px;
-      margin: 5px 0;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
+      overflow: hidden;
     }
 
-    .result-item:hover {
-      background: rgba(255, 255, 255, 0.5);
-      color: black;
+    .show-all-button {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .container {
+        margin-top: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="title">Canti & Lyrics</div>
-
+    <!-- Project Title -->
+    <h1 class="title">Canti & Lyrics</h1>
+    
+    <!-- Buttons -->
     <div class="button-group">
-      <button class="button" onclick="window.location.href='aggiungi.html'">Aggiungi</button>
+      <a href="#" class="button">Cerca</a>
+      <a href="aggiungi.html" class="button">Aggiungi</a>
     </div>
-
+  
+    <!-- Search Box -->
     <div class="search-box">
-      <input id="search-input" type="text" class="search-input" placeholder="Ricerca" oninput="filterResults()">
+      <input type="text" placeholder="Ricerca" class="search-input">
+    </div>
+  
+    <!-- Results Box -->
+    <div class="results-box">
+      <p>Risultati della ricerca</p>
     </div>
 
-    <div id="results-box" class="results-box">
-      <!-- Dynamic results will be added here -->
+    <!-- Show All Button -->
+    <div class="show-all-button">
+      <button class="button">Mostra tutto</button>
     </div>
   </div>
 
+  <!-- Inline Script -->
   <script>
-    // Initialize Dexie database
-    const db = new Dexie("LyricsDatabase");
-    db.version(1).stores({
-      lyrics: "++id, category, title, text, notes, photo, audio, doc"
+    // Ensure the container appears in the middle of the browser viewport
+        window.addEventListener('load', () => {
+        const container = document.querySelector('.container');
+        const containerRect = container.getBoundingClientRect();
+
+        // Calculate the center position
+        const scrollLeft = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+        const scrollTop = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+
+        // Scroll to the calculated center position
+        window.scrollTo({
+            left: scrollLeft,
+            top: scrollTop,
+            behavior: 'auto', // Instant centering when the page loads
+        });
     });
 
-    // Sample data for testing (comment this out if your database is populated)
-    async function populateSampleData() {
-      await db.lyrics.clear();
-      await db.lyrics.bulkAdd([
-        { title: "Song 1", text: "Lyrics of song 1", category: "Canto" },
-        { title: "Song 2", text: "Lyrics of song 2", category: "Liturgico" },
-        { title: "Song 3", text: "Lyrics of song 3", category: "Altro" },
-      ]);
-    }
-    populateSampleData();
+    // Example interactivity
+    document.querySelector('.button').addEventListener('click', () => {
+        alert('Button clicked!');
+    });
 
-    // Populate results on page load
-    async function loadResults() {
-      const resultsBox = document.getElementById("results-box");
-      resultsBox.innerHTML = ""; // Clear previous results
-      const lyrics = await db.lyrics.toArray();
-
-      lyrics.forEach((lyric) => {
-        const resultItem = document.createElement("div");
-        resultItem.className = "result-item";
-        resultItem.textContent = `${lyric.title} - ${lyric.category}`;
-        resultItem.onclick = () => alert(`Title: ${lyric.title}\nText: ${lyric.text}`);
-        resultsBox.appendChild(resultItem);
-      });
-    }
-
-    loadResults();
-
-    // Filter results
-    async function filterResults() {
-      const query = document.getElementById("search-input").value.toLowerCase();
-      const resultsBox = document.getElementById("results-box");
-      resultsBox.innerHTML = ""; // Clear previous results
-      const lyrics = await db.lyrics.toArray();
-
-      lyrics
-        .filter((lyric) => lyric.title.toLowerCase().includes(query) || lyric.text.toLowerCase().includes(query))
-        .forEach((lyric) => {
-          const resultItem = document.createElement("div");
-          resultItem.className = "result-item";
-          resultItem.textContent = `${lyric.title} - ${lyric.category}`;
-          resultItem.onclick = () => alert(`Title: ${lyric.title}\nText: ${lyric.text}`);
-          resultsBox.appendChild(resultItem);
+    // Register the service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
         });
     }
   </script>

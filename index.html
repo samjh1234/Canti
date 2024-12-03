@@ -147,17 +147,19 @@
   <!-- Inline Script -->
   <script>
     // Ensure the container appears in the middle of the browser viewport
-    window.addEventListener('load', () => {
+        window.addEventListener('load', () => {
         const container = document.querySelector('.container');
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
         const containerRect = container.getBoundingClientRect();
-        const scrollX = (containerRect.width - viewportWidth) / 2;
-        const scrollY = (containerRect.height - viewportHeight) / 2;
+
+        // Calculate the center position
+        const scrollLeft = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+        const scrollTop = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+
+        // Scroll to the calculated center position
         window.scrollTo({
-          left: container.offsetLeft - scrollX,
-          top: container.offsetTop - scrollY,
-          behavior: 'auto',
+            left: scrollLeft,
+            top: scrollTop,
+            behavior: 'auto', // Instant centering when the page loads
         });
     });
 

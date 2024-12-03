@@ -22,11 +22,14 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      overflow: auto; /* Enable scrolling for smaller devices */
     }
 
     .container {
       width: 90%;
       max-width: 500px;
+      height: 80%; /* Fixed height */
+      max-height: 600px;
       background: #dff3ff; /* Light background for form */
       border-radius: 20px;
       padding: 20px;
@@ -34,6 +37,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-y: auto; /* Allow scrolling within the container if needed */
     }
 
     .title {
@@ -94,7 +98,7 @@
 
     .textarea {
       width: 100%;
-      height: 100px;
+      height: 200px;
       padding: 10px;
       border-radius: 10px;
       border: none;
@@ -147,6 +151,21 @@
       background: rgba(133, 193, 220, 0.8);
       color: white;
     }
+
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .container {
+        margin-top: 20px;
+        max-height: 80%; /* Ensure it stays scrollable in landscape mode */
+      }
+    }
   </style>
 </head>
 <body>
@@ -187,9 +206,25 @@
   </div>
 
   <script>
-    // Example JavaScript interactivity
+    // Ensure the container appears in the middle of the browser viewport
+    window.addEventListener('load', () => {
+        const container = document.querySelector('.container');
+
+        // Calculate the middle position of the container
+        const scrollX = container.offsetLeft - (window.innerWidth - container.offsetWidth) / 2;
+        const scrollY = container.offsetTop - (window.innerHeight - container.offsetHeight) / 2;
+
+        // Scroll the window to the calculated position
+        window.scrollTo({
+            left: scrollX > 0 ? scrollX : 0, // Prevent negative scrolling
+            top: scrollY > 0 ? scrollY : 0,
+            behavior: 'auto' // Instant centering when the page loads
+        });
+    });
+
+    // Example save button interactivity
     document.querySelector('.save-button').addEventListener('click', () => {
-      alert('Salvato con successo!');
+      alert('Testo salvato con successo!');
     });
   </script>
 </body>

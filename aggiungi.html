@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#85C1DC">
   <title>Aggiungi Testo</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.png" type="image/png">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
@@ -40,11 +44,25 @@
       overflow-y: auto; /* Allow scrolling within the container if needed */
     }
 
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
     .title {
       font-size: 1.5rem;
-      margin-bottom: 15px;
+      margin-left: 10px; /* Space between logo and title */
       color: #333;
       text-align: center;
+    }
+
+    .logo {
+      width: 40px; /* Adjust the size of the logo */
+      height: 40px;
+      border-radius: 50%; /* Optional: Make the logo circular */
+      cursor: pointer; /* Add pointer cursor for clarity */
     }
 
     .button-group {
@@ -170,7 +188,13 @@
 </head>
 <body>
   <div class="container">
-    <div class="title">Categoria del testo</div>
+    <!-- Title with Logo -->
+    <div class="title-container">
+      <a href="index.html">
+        <img src="logo.png" alt="Logo" class="logo">
+      </a>
+      <div class="title">Categoria del testo</div>
+    </div>
 
     <!-- Button Group -->
     <div class="button-group">

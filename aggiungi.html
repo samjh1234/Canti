@@ -107,8 +107,8 @@
     }
 
     .button.active {
-      background: rgba(133, 193, 220, 1); /* Highlight clicked button */
-      color: white; /* Change text color */
+      background: rgba(133, 193, 220, 1);
+      color: white;
     }
 
     .input-group {
@@ -192,6 +192,19 @@
     .save-button:hover {
       background: rgba(133, 193, 220, 0.8);
       color: white;
+    }
+
+    @media (orientation: landscape) {
+      body {
+        flex-direction: column; /* Ensure content flows vertically */
+        align-items: center; /* Keep centered horizontally */
+        justify-content: flex-start; /* Start content at the top */
+        overflow-y: auto; /* Enable scrolling for smaller screens */
+      }
+
+      .container {
+        margin-top: 20px; /* Add some space at the top */
+      }
     }
   </style>
 </head>

@@ -35,7 +35,7 @@
       max-width: 500px;
       background: #dff3ff;
       border-radius: 20px;
-      padding: 20px;
+      padding: 5px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
@@ -47,12 +47,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
     }
 
     .arrow {
-      width: 20px;
-      height: 20px;
+      width: 15px;
+      height: 15px;
       margin-right: 5px;
       display: inline-block;
       border-left: 2px solid black;
@@ -66,8 +66,8 @@
     }
 
     .title-container img {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       margin-right: 10px;
       cursor: pointer;
     }
@@ -107,8 +107,8 @@
     }
 
     .button.active {
-      background: rgba(133, 193, 220, 1);
-      color: white;
+      background: rgba(133, 193, 220, 1); /* Highlight clicked button */
+      color: white; /* Change text color */
     }
 
     .input-group {
@@ -129,7 +129,7 @@
 
     .textarea {
       width: 100%;
-      height: 175px;
+      height: 275px;
       padding: 10px;
       border-radius: 10px;
       border: none;
@@ -196,14 +196,16 @@
 
     @media (orientation: landscape) {
       body {
-        flex-direction: column; /* Ensure content flows vertically */
-        align-items: center; /* Keep centered horizontally */
-        justify-content: flex-start; /* Start content at the top */
-        overflow-y: auto; /* Enable scrolling for smaller screens */
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
       }
 
       .container {
-        margin-top: 20px; /* Add some space at the top */
+        margin-top: 20px;
+        max-height: 90%; /* Ensure the container remains scrollable in landscape */
       }
     }
   </style>
@@ -244,11 +246,11 @@
       </label>
       <label class="file-button">
         Allega Audio
-        <input id="audio" type="file" accept="audio/*" style="display: none;">
+        <input id="audio" type="file" style="display: none;"> <!-- Accept all file types -->
       </label>
       <label class="file-button">
         Allega Doc
-        <input id="doc" type="file" accept=".pdf,.doc,.docx" style="display: none;">
+        <input id="doc" type="file" style="display: none;"> <!-- Accept all file types -->
       </label>
     </div>
 
@@ -274,10 +276,12 @@
       });
     });
 
-    // Initialize Dexie database
+    // Initialize Dexie Database
     const db = new Dexie("LyricsDatabase");
-    db.version(1).stores({
-      lyrics: "++id, category, title, text, notes, photo, audio, doc"
+
+    // Increment version and define schema
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
 
     let selectedCategory = "";
@@ -296,9 +300,9 @@
       const title = document.getElementById("title").value;
       const text = document.getElementById("text").value;
       const notes = document.getElementById("notes").value;
-      const photo = document.getElementById("photo").files[0];
-      const audio = document.getElementById("audio").files[0];
-      const doc = document.getElementById("doc").files[0];
+      const photoFile = document.getElementById("photo").files[0];
+      const audioFile = document.getElementById("audio").files[0];
+      const docFile = document.getElementById("doc").files[0];
 
       if (!selectedCategory || !title || !text) {
         alert("Categoria, Titolo e Testo sono obbligatori!");
@@ -310,9 +314,12 @@
         title,
         text,
         notes,
-        photo: photo ? await fileToBase64(photo) : null,
-        audio: audio ? await fileToBase64(audio) : null,
-        doc: doc ? await fileToBase64(doc) : null,
+        photo: photoFile ? await fileToBase64(photoFile) : null,
+        photoType: photoFile ? photoFile.type : null, // Save photo MIME type
+        audio: audioFile ? await fileToBase64(audioFile) : null,
+        audioType: audioFile ? audioFile.type : null, // Save audio MIME type
+        doc: docFile ? await fileToBase64(docFile) : null,
+        docType: docFile ? docFile.type : null, // Save document MIME type
       };
 
       await db.lyrics.add(entry);

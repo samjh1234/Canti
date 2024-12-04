@@ -10,6 +10,8 @@
   <link rel="manifest" href="manifest.json">
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
+  <!-- Dexie.js -->
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
   <!-- Inline Styles -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
@@ -102,13 +104,23 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 20px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
       color: white;
       text-align: center;
       font-size: 1.2rem;
       padding: 10px;
-      overflow: hidden;
+      overflow-y: auto;
+    }
+
+    .results-box p {
+      cursor: pointer;
+      margin: 5px 0;
+    }
+
+    .results-box p:hover {
+      text-decoration: underline;
     }
 
     .show-all-button {
@@ -140,60 +152,86 @@
     
     <!-- Buttons -->
     <div class="button-group">
-      <a href="#" class="button">Cerca</a>
+      <button id="search-button" class="button">Cerca</button>
       <a href="aggiungi.html" class="button">Aggiungi</a>
     </div>
   
     <!-- Search Box -->
     <div class="search-box">
-      <input type="text" placeholder="Ricerca" class="search-input">
+      <input type="text" id="search-input" placeholder="Ricerca" class="search-input">
     </div>
   
     <!-- Results Box -->
-    <div class="results-box">
+    <div class="results-box" id="results-box">
       <p>Risultati della ricerca</p>
-    </div>
-
-    <!-- Show All Button -->
-    <div class="show-all-button">
-      <button class="button">Mostra tutto</button>
     </div>
   </div>
 
   <!-- Inline Script -->
   <script>
-    // Ensure the container appears in the middle of the browser viewport
-        window.addEventListener('load', () => {
-        const container = document.querySelector('.container');
-        const containerRect = container.getBoundingClientRect();
+    const db = new Dexie("LyricsDatabase");
 
-        // Calculate the center position
-        const scrollLeft = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
-        const scrollTop = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
-
-        // Scroll to the calculated center position
-        window.scrollTo({
-            left: scrollLeft,
-            top: scrollTop,
-            behavior: 'auto', // Instant centering when the page loads
-        });
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
 
-    // Example interactivity
-    document.querySelector('.button').addEventListener('click', () => {
-        alert('Button clicked!');
-    });
+    // Function to populate the results-box dynamically
+    async function populateResults(query = "") {
+      const resultsBox = document.getElementById("results-box");
+      resultsBox.innerHTML = '';
 
-    // Register the service worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-          console.error('Service Worker registration failed:', error);
+      const results = query
+        ? await db.lyrics
+            .where('title')
+            .startsWithIgnoreCase(query)
+            .or('text')
+            .startsWithIgnoreCase(query)
+            .or('notes')
+            .startsWithIgnoreCase(query)
+            .or('category')
+            .startsWithIgnoreCase(query)
+            .toArray()
+        : await db.lyrics.toArray(); // If no query, fetch all records
+
+      if (results.length === 0) {
+        resultsBox.textContent = 'Nessun risultato trovato';
+        return;
+      }
+
+      results.forEach(record => {
+        const item = document.createElement('p');
+        item.textContent = record.title || 'Titolo sconosciuto';
+        item.addEventListener('click', () => {
+          window.location.href = `record.html?id=${record.id}`;
         });
+        resultsBox.appendChild(item);
+      });
     }
+
+    // Search Input Handler
+    document.getElementById("search-input").addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      populateResults(query);
+    });
+
+    // "Cerca" Button Handler
+    document.getElementById("search-button").addEventListener('click', () => {
+      const query = document.getElementById("search-input").value.trim().toLowerCase();
+      populateResults(query || ""); // Show all if the input is empty
+    });
+    // Scroll to the middle of the page
+    window.addEventListener("load", () => {
+      const container = document.querySelector(".container");
+      const containerRect = container.getBoundingClientRect();
+      const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+      const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+
+      window.scrollTo({
+        left: scrollX > 0 ? scrollX : 0,
+        top: scrollY > 0 ? scrollY : 0,
+        behavior: "auto",
+      });
+    });
   </script>
 </body>
 </html>

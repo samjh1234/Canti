@@ -117,10 +117,10 @@
   </div>
 
   <script>
-    // Initialize Dexie database
+    // Initialize Dexie database with updated schema
     const db = new Dexie("LyricsDatabase");
-    db.version(1).stores({
-      lyrics: "++id, category, title, text, notes, photo, audio, doc"
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
 
     // Backup Database

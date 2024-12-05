@@ -7,6 +7,7 @@ const urlsToCache = [
   "/modifica.html",
   "/db-admin.html",
   "/photos/favicon.png",
+  "/photos/logo.png",
   "/photos/icon-192x192.png",
   "/photos/icon-512x512.png",
   "/photos/backgroundfo.png",

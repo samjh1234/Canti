@@ -268,33 +268,44 @@
       const containerRect = container.getBoundingClientRect();
       const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
       const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
-
+  
       window.scrollTo({
         left: scrollX > 0 ? scrollX : 0,
         top: scrollY > 0 ? scrollY : 0,
         behavior: "auto",
       });
     });
-
+  
     // Initialize Dexie Database
     const db = new Dexie("LyricsDatabase");
-
+  
     // Increment version and define schema
     db.version(2).stores({
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
-
+  
     let selectedCategory = "";
-
+  
     // Toggle active category button
     document.querySelectorAll(".button").forEach((button) => {
       button.addEventListener("click", () => {
         document.querySelectorAll(".button").forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
-        selectedCategory = button.textContent; // Save category name
+  
+        if (button.textContent === "Altro") {
+          const customCategory = prompt("Inserisci manualmente il nome della categoria:");
+          if (customCategory) {
+            selectedCategory = customCategory; // Save the user-inputted category
+            alert(`Categoria impostata come: "${customCategory}"`);
+          } else {
+            button.classList.remove("active"); // Deselect "Altro" if no input
+          }
+        } else {
+          selectedCategory = button.textContent; // Save predefined category
+        }
       });
     });
-
+  
     // Save Data
     document.getElementById("save").addEventListener("click", async () => {
       const title = document.getElementById("title").value;
@@ -303,11 +314,22 @@
       const photoFile = document.getElementById("photo").files[0];
       const audioFile = document.getElementById("audio").files[0];
       const docFile = document.getElementById("doc").files[0];
-
+  
       if (!selectedCategory || !title || !text) {
         alert("Categoria, Titolo e Testo sono obbligatori!");
         return;
       }
+      
+      // Check for duplicate entry in the database
+  const duplicate = await db.lyrics.where({
+    title: title,
+    category: selectedCategory,
+  }).first();
+
+  if (duplicate) {
+    alert("Esiste già un record con lo stesso titolo e categoria!");
+    return; // Stop further processing if duplication is detected
+  }
 
       const entry = {
         category: selectedCategory,
@@ -321,11 +343,13 @@
         doc: docFile ? await fileToBase64(docFile) : null,
         docType: docFile ? docFile.type : null, // Save document MIME type
       };
-
+  
       await db.lyrics.add(entry);
       alert("Testo salvato con successo!");
+      // Refresh the page to reset fields
+      location.reload();
     });
-
+  
     // Helper function to convert file to Base64
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {

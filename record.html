@@ -7,7 +7,7 @@
   <title>Record Details</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <link rel="icon" href="photos/logo.png" type="image/png">
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
@@ -34,7 +34,7 @@
       max-width: 500px;
       background: #dff3ff;
       border-radius: 20px;
-      padding: 20px;
+      padding: 5px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
@@ -111,8 +111,8 @@
     }
 
     .arrow {
-      width: 15px;
-      height: 15px;
+      width: 10px;
+      height: 10px;
       margin-right: 5px;
       display: inline-block;
       border-left: 2px solid black;
@@ -126,8 +126,8 @@
     }
 
     .title-container img {
-      width: 30px;
-      height: 30px;
+      width: 20px;
+      height: 20px;
       margin-right: 10px;
       cursor: pointer;
     }
@@ -149,6 +149,14 @@
       .text-box {
         height: 250px;
       }
+    }
+
+    .text-box img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border-radius: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -197,15 +205,23 @@
       return mimeMap[mimeType] || "";
     }
 
+    function makeLinksClickable(text) {
+      const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
+      return text.replace(urlRegex, (url) => {
+        const hyperlink = url.startsWith("http") ? url : `http://${url}`;
+        return `<a href="${hyperlink}" target="_blank">${url}</a>`;
+      });
+    }
+
     async function loadRecord() {
       const params = new URLSearchParams(window.location.search);
       const recordId = parseInt(params.get("id"), 10);
 
       const record = await db.lyrics.get(recordId);
 
-      document.getElementById("record-title").textContent = record.title;
-      document.getElementById("record-content").textContent = record.text;
-      document.getElementById("notes-box").textContent = record.notes || "";
+      document.getElementById("record-title").innerHTML = `${record.title} <span style="font-weight: normal;">(${record.category})</span>`;
+      document.getElementById("record-content").innerHTML = makeLinksClickable(record.text);
+      document.getElementById("notes-box").innerHTML = makeLinksClickable(record.notes || "");
 
       if (record.audio) {
         const audio = document.getElementById("audio-player");
@@ -213,16 +229,32 @@
         audio.classList.remove("hidden");
       }
 
+      // Handle photo display
+      if (record.photo && record.photoType) {
+        const photoImg = document.createElement("img");
+        photoImg.src = record.photo;
+        photoImg.alt = "Photo";
+
+        photoImg.addEventListener("click", () => {
+          const base64Data = record.photo.split(",")[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: record.photoType });
+          const blobUrl = URL.createObjectURL(blob);
+
+          window.open(blobUrl, "_blank");
+        });
+
+        const recordTextBox = document.getElementById("record-text");
+        recordTextBox.appendChild(photoImg);
+      }
+
       const attachmentsButton = document.getElementById("attachments");
       const files = [];
-
-      if (record.photo && record.photoType) {
-        files.push({
-          data: record.photo,
-          type: record.photoType,
-          filename: `${record.title || "photo"}${getFileExtension(record.photoType)}`
-        });
-      }
 
       if (record.doc && record.docType) {
         files.push({

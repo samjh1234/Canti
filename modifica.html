@@ -185,13 +185,21 @@
       margin-right: 10px;
     }
 
-    .save-button:last-child {
-      margin-right: 0;
+    .delete-button {
+      background: rgba(255, 99, 71, 0.5);
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .save-button:hover {
-      background: rgba(133, 193, 220, 0.8);
-      color: white;
+    .delete-button:hover {
+      background: rgba(255, 69, 0, 0.8);
     }
 
     @media (orientation: landscape) {
@@ -213,7 +221,7 @@
 <body>
   <div class="container">
     <div class="title-container">
-      <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none;">
         <span class="arrow"></span>
         <img src="photos/logo.png" alt="Logo">
       </a>
@@ -253,117 +261,149 @@
 
     <div class="save-buttons-container">
       <button id="save" class="save-button">Salva Modifiche</button>
+      <button id="delete" class="delete-button">Elimina</button>
     </div>
   </div>
 
   <script>
-    // Scroll to the middle of the page
-    window.addEventListener("load", async () => {
+    const db = new Dexie("LyricsDatabase");
+  
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+  
+    let updatedRecord = null; // Temporary record to store changes
+  
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+  
+      // Correct the back arrow and logo dynamic link
+      const backLink = document.querySelector(".title-container a");
+      if (backLink && recordId) {
+        backLink.href = `record.html?id=${recordId}`;
+      }
+  
+      // Scroll to the middle of the page
       const container = document.querySelector(".container");
       const containerRect = container.getBoundingClientRect();
       const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
       const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
-
+  
       window.scrollTo({
         left: scrollX > 0 ? scrollX : 0,
         top: scrollY > 0 ? scrollY : 0,
         behavior: "auto",
       });
-
+  
       // Load record data
-      const params = new URLSearchParams(window.location.search);
-      const recordId = parseInt(params.get("id"), 10);
       const record = await db.lyrics.get(recordId);
-
+      updatedRecord = { ...record }; // Create a copy for temporary updates
+  
       if (record) {
         document.getElementById("title").value = record.title || "";
         document.getElementById("text").value = record.text || "";
         document.getElementById("notes").value = record.notes || "";
-
+  
         // Handle Category Buttons
         const categoryButtons = document.querySelectorAll(".button");
         categoryButtons.forEach((button) => {
           button.classList.toggle("active", button.textContent === record.category);
+  
+          button.addEventListener("click", async () => {
+            categoryButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+  
+            if (button.textContent === "Altro") {
+              const customCategory = prompt("Inserisci manualmente il nome della categoria:");
+              if (customCategory) {
+                updatedRecord.category = customCategory; // Save the user-inputted category
+                alert(`Categoria impostata come: "${customCategory}"`);
+              } else {
+                button.classList.remove("active"); // Deselect "Altro" if no input
+              }
+            } else {
+              updatedRecord.category = button.textContent; // Save predefined category
+            }
+          });
         });
-
-        // Handle Allegati Fields
+  
         const handleFileClick = (fieldId, existingFieldName) => {
           const input = document.getElementById(fieldId);
           input.addEventListener("click", (e) => {
-            if (record[existingFieldName]) {
-              const confirmReplace = confirm(
-                `File già presente. Vuoi sostituire il file esistente?`
+            if (updatedRecord[existingFieldName]) {
+              const action = prompt(
+                `File già presente. Scegli un'opzione:\n1. Sostituisci il file\n2. Elimina il file\n\nAnnulla per non fare nulla.`
               );
-              if (!confirmReplace) {
-                e.preventDefault();
+  
+              if (action === "2") {
+                updatedRecord[existingFieldName] = null;
+                updatedRecord[`${existingFieldName}Type`] = null;
+                alert(`${existingFieldName} contrassegnato per eliminazione.`);
+                e.preventDefault(); // Prevent opening file dialog
+              } else if (action !== "1") {
+                e.preventDefault(); // Cancel the file input click if the user selects "Annulla."
               }
             }
           });
         };
-
+  
         handleFileClick("photo", "photo");
         handleFileClick("audio", "audio");
         handleFileClick("doc", "doc");
       }
     });
-
-    // Initialize Dexie Database
-    const db = new Dexie("LyricsDatabase");
-
-    db.version(2).stores({
-      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
-    });
-
-    let selectedCategory = "";
-
-    // Toggle active category button
-    document.querySelectorAll(".button").forEach((button) => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll(".button").forEach((btn) => btn.classList.remove("active"));
-        button.classList.add("active");
-        selectedCategory = button.textContent; // Save category name
-      });
-    });
-
-    // Save Data
+  
     document.getElementById("save").addEventListener("click", async () => {
       const params = new URLSearchParams(window.location.search);
       const recordId = parseInt(params.get("id"), 10);
-
+  
       const title = document.getElementById("title").value;
       const text = document.getElementById("text").value;
       const notes = document.getElementById("notes").value;
       const photoFile = document.getElementById("photo").files[0];
       const audioFile = document.getElementById("audio").files[0];
       const docFile = document.getElementById("doc").files[0];
-
-      if (!selectedCategory || !title || !text) {
-        alert("Categoria, Titolo e Testo sono obbligatori!");
+  
+      if (!title || !text) {
+        alert("Titolo e Testo sono obbligatori!");
         return;
       }
-
-      const updatedRecord = await db.lyrics.get(recordId);
-
-      const entry = {
-        ...updatedRecord,
-        category: selectedCategory,
-        title,
-        text,
-        notes,
-        photo: photoFile ? await fileToBase64(photoFile) : updatedRecord.photo,
-        photoType: photoFile ? photoFile.type : updatedRecord.photoType,
-        audio: audioFile ? await fileToBase64(audioFile) : updatedRecord.audio,
-        audioType: audioFile ? audioFile.type : updatedRecord.audioType,
-        doc: docFile ? await fileToBase64(docFile) : updatedRecord.doc,
-        docType: docFile ? docFile.type : updatedRecord.docType,
-      };
-
-      await db.lyrics.put(entry);
+  
+      updatedRecord.title = title;
+      updatedRecord.text = text;
+      updatedRecord.notes = notes;
+  
+      if (photoFile) {
+        updatedRecord.photo = await fileToBase64(photoFile);
+        updatedRecord.photoType = photoFile.type;
+      }
+      if (audioFile) {
+        updatedRecord.audio = await fileToBase64(audioFile);
+        updatedRecord.audioType = audioFile.type;
+      }
+      if (docFile) {
+        updatedRecord.doc = await fileToBase64(docFile);
+        updatedRecord.docType = docFile.type;
+      }
+  
+      await db.lyrics.put(updatedRecord);
       alert("Modifiche salvate con successo!");
       window.location.href = `record.html?id=${recordId}`;
     });
-
-    // Helper function to convert file to Base64
+  
+    document.getElementById("delete").addEventListener("click", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+  
+      const confirmDelete = confirm("Sei sicuro di voler eliminare questo record?");
+      if (!confirmDelete) return;
+  
+      await db.lyrics.delete(recordId);
+      alert("Record eliminato con successo!");
+      window.location.href = "index.html";
+    });
+  
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();

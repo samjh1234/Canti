@@ -7,7 +7,7 @@
   <title>Record Details</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <link rel="icon" href="photos/logo.png" type="image/png">
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
@@ -20,49 +20,61 @@
 
     body {
       font-family: 'Inria Serif', serif;
-      background: url('photos/backgroundfo.png') no-repeat center center/cover;
-      height: 100vh;
-      width: 100vw;
+      background: #cce7ff;
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
+      margin: 0;
       overflow: auto;
     }
 
     .container {
       width: 90%;
       max-width: 500px;
-      background: rgba(255, 255, 255, 0.1);
+      background: #dff3ff;
       border-radius: 20px;
-      backdrop-filter: blur(8px);
+      padding: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
-      justify-content: space-between;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .text-box, .notes-box {
+    .text-box {
       width: 100%;
-      background: rgba(255, 255, 255, 0.2);
+      height: 375px;
+      background: #f5f5f5;
       border-radius: 15px;
       padding: 10px;
       margin-bottom: 15px;
       font-size: 1rem;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .notes-box {
+      width: 100%;
+      height: 50px;
+      background: #f5f5f5;
+      border-radius: 15px;
+      padding: 10px;
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 15px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
       overflow-y: auto;
       text-align: center;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .media-player {
       width: 100%;
-      background: rgba(255, 255, 255, 0.2);
+      background: #f5f5f5;
       border-radius: 15px;
       padding: 10px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
@@ -76,27 +88,26 @@
     .button {
       background: rgba(133, 193, 220, 0.5);
       border: none;
-      color: white;
-      font-size: 1rem;
       padding: 10px;
-      border-radius: 25px;
+      border-radius: 20px;
+      font-size: 1rem;
+      color: #333;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       width: 48%;
-      text-decoration: none;
-      display: inline-block;
     }
 
     .button:hover {
       background: rgba(133, 193, 220, 0.8);
+      color: white;
     }
 
     .title-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .arrow {
@@ -104,14 +115,14 @@
       height: 10px;
       margin-right: 5px;
       display: inline-block;
-      border-left: 2px solid white;
-      border-bottom: 2px solid white;
+      border-left: 2px solid black;
+      border-bottom: 2px solid black;
       transform: rotate(45deg);
       cursor: pointer;
     }
 
     .arrow:hover {
-      border-color: rgba(255, 255, 255, 0.7);
+      border-color: rgba(0, 0, 0, 0.7);
     }
 
     .title-container img {
@@ -121,12 +132,23 @@
       cursor: pointer;
     }
 
-    .title-container h1 {
-      font-size: 1.5rem;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      text-align: center;
-      margin: 0;
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .container {
+        margin-top: 20px;
+        max-height: 80%;
+      }
+
+      .text-box {
+        height: 250px;
+      }
     }
 
     .text-box img {
@@ -145,10 +167,12 @@
         <span class="arrow"></span>
         <img src="photos/logo.png" alt="Logo">
       </a>
-      <h1 id="record-title">Titolo</h1>
     </div>
 
-    <div class="text-box" id="record-text">Testo sarà mostrato qui</div>
+    <div class="text-box" id="record-text">
+      <strong id="record-title">Titolo</strong>
+      <div id="record-content">Testo sarà mostrato qui</div>
+    </div>
 
     <div class="notes-box" id="notes-box">Mostra le note qui</div>
 
@@ -195,9 +219,20 @@
 
       const record = await db.lyrics.get(recordId);
 
+      // Title with category
       document.getElementById("record-title").innerHTML = `${record.title} <span style="font-weight: normal;">(${record.category})</span>`;
-      document.getElementById("record-text").innerHTML = makeLinksClickable(record.text.replace(/\n/g, "<br>"));
-      document.getElementById("notes-box").innerHTML = makeLinksClickable((record.notes || "").replace(/\n/g, "<br>"));
+
+      // Preserve text formatting and make links clickable
+      const recordContent = document.getElementById("record-content");
+      recordContent.textContent = ""; // Clear existing content
+      recordContent.style.whiteSpace = "pre-wrap"; // Preserve formatting
+      recordContent.innerHTML = makeLinksClickable(record.text); // Add formatted and clickable text
+
+      // Preserve text formatting for notes
+      const notesBox = document.getElementById("notes-box");
+      notesBox.textContent = ""; // Clear existing content
+      notesBox.style.whiteSpace = "pre-wrap"; // Preserve formatting
+      notesBox.innerHTML = makeLinksClickable(record.notes || ""); // Add formatted and clickable notes
 
       if (record.audio) {
         const audio = document.getElementById("audio-player");
@@ -205,6 +240,7 @@
         audio.classList.remove("hidden");
       }
 
+      // Handle photo display
       if (record.photo && record.photoType) {
         const photoImg = document.createElement("img");
         photoImg.src = record.photo;
@@ -262,6 +298,7 @@
 
     loadRecord();
 
+    // Scroll to the middle of the page
     window.addEventListener("load", () => {
       const container = document.querySelector(".container");
       const containerRect = container.getBoundingClientRect();

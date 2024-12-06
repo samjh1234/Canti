@@ -20,94 +20,36 @@
 
     body {
       font-family: 'Inria Serif', serif;
-      background: #cce7ff;
+      background: url('photos/backgroundfo.png') no-repeat center center/cover;
+      height: 100vh;
+      width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      overflow: auto;
+      overflow: hidden;
     }
 
     .container {
       width: 90%;
-      max-width: 500px;
-      background: #dff3ff;
+      max-width: 360px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 20px;
-      padding: 5px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    .text-box {
-      width: 100%;
-      height: 375px;
-      background: #f5f5f5;
-      border-radius: 15px;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-size: 1rem;
-      color: #333;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      overflow-y: auto;
-    }
-
-    .notes-box {
-      width: 100%;
-      height: 50px;
-      background: #f5f5f5;
-      border-radius: 15px;
-      padding: 10px;
-      font-size: 1rem;
-      color: #333;
-      margin-bottom: 15px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
-      text-align: center;
-    }
-
-    .media-player {
-      width: 100%;
-      background: #f5f5f5;
-      border-radius: 15px;
-      padding: 10px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .buttons-row {
-      display: flex;
+      padding: 5px;
       justify-content: space-between;
-      width: 100%;
-      margin-top: 15px;
-    }
-
-    .button {
-      background: rgba(133, 193, 220, 0.5);
-      border: none;
-      padding: 10px;
-      border-radius: 20px;
-      font-size: 1rem;
-      color: #333;
-      cursor: pointer;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 48%;
-    }
-
-    .button:hover {
-      background: rgba(133, 193, 220, 0.8);
-      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
     }
 
     .title-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 10px;
+      margin-bottom: 3px;
     }
 
     .arrow {
@@ -116,7 +58,7 @@
       margin-right: 5px;
       display: inline-block;
       border-left: 2px solid black;
-      border-bottom: 2px solid black;
+      border-bottom: 1px solid black;
       transform: rotate(45deg);
       cursor: pointer;
     }
@@ -128,33 +70,95 @@
     .title-container img {
       width: 20px;
       height: 20px;
-      margin-right: 10px;
+      margin-right: 1px;
       cursor: pointer;
+    }
+
+    .text-box {
+      width: 100%;
+      height: 450px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 2px;
+      font-size: 1rem;
+      color: black;
+      text-align: center;
+      overflow-y: auto;
+      margin-bottom: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      white-space: pre-wrap;
+    }
+
+    .notes-box {
+      width: 100%;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 5px;
+      font-size: 1rem;
+      color: black;
+      overflow-y: auto;
+      text-align: center;
+      white-space: pre-wrap;
+      margin-bottom: 5px;
+    }
+
+    .media-player {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 5px;
+      text-align: center;
+    }
+
+    .buttons-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .button {
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 8px;
+      border-radius: 25px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      width: 48%;
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
     }
 
     @media (orientation: landscape) {
       body {
-        flex-direction: row;
         justify-content: center;
-        align-items: flex-start;
-        height: auto;
-        overflow-x: auto;
+        align-items: center;
+        overflow-x: hidden;
       }
 
       .container {
-        margin-top: 20px;
+        height: 80%;
         max-height: 80%;
       }
 
       .text-box {
-        height: 250px;
+        height: 300px;
       }
     }
 
     .text-box img {
       max-width: 100%;
       height: auto;
-      margin-top: 10px;
+      margin-top: 5px;
       border-radius: 10px;
       cursor: pointer;
     }
@@ -219,20 +223,14 @@
 
       const record = await db.lyrics.get(recordId);
 
-      // Title with category
       document.getElementById("record-title").innerHTML = `${record.title} <span style="font-weight: normal;">(${record.category})</span>`;
-
-      // Preserve text formatting and make links clickable
       const recordContent = document.getElementById("record-content");
-      recordContent.textContent = ""; // Clear existing content
-      recordContent.style.whiteSpace = "pre-wrap"; // Preserve formatting
-      recordContent.innerHTML = makeLinksClickable(record.text); // Add formatted and clickable text
+      recordContent.textContent = "";
+      recordContent.innerHTML = makeLinksClickable(record.text.replace(/\n/g, "<br>"));
 
-      // Preserve text formatting for notes
       const notesBox = document.getElementById("notes-box");
-      notesBox.textContent = ""; // Clear existing content
-      notesBox.style.whiteSpace = "pre-wrap"; // Preserve formatting
-      notesBox.innerHTML = makeLinksClickable(record.notes || ""); // Add formatted and clickable notes
+      notesBox.textContent = "";
+      notesBox.innerHTML = makeLinksClickable((record.notes || "").replace(/\n/g, "<br>"));
 
       if (record.audio) {
         const audio = document.getElementById("audio-player");
@@ -240,12 +238,10 @@
         audio.classList.remove("hidden");
       }
 
-      // Handle photo display
       if (record.photo && record.photoType) {
         const photoImg = document.createElement("img");
         photoImg.src = record.photo;
         photoImg.alt = "Photo";
-
         photoImg.addEventListener("click", () => {
           const base64Data = record.photo.split(",")[1];
           const byteCharacters = atob(base64Data);
@@ -256,12 +252,9 @@
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: record.photoType });
           const blobUrl = URL.createObjectURL(blob);
-
           window.open(blobUrl, "_blank");
         });
-
-        const recordTextBox = document.getElementById("record-text");
-        recordTextBox.appendChild(photoImg);
+        recordContent.appendChild(photoImg);
       }
 
       const attachmentsButton = document.getElementById("attachments");
@@ -298,8 +291,7 @@
 
     loadRecord();
 
-    // Scroll to the middle of the page
-    window.addEventListener("load", () => {
+    function centerContainer() {
       const container = document.querySelector(".container");
       const containerRect = container.getBoundingClientRect();
       const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
@@ -310,7 +302,10 @@
         top: scrollY > 0 ? scrollY : 0,
         behavior: "auto",
       });
-    });
+    }
+
+    window.addEventListener("load", centerContainer);
+    window.addEventListener("resize", centerContainer);
   </script>
 </body>
 </html>

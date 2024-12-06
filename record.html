@@ -219,9 +219,20 @@
 
       const record = await db.lyrics.get(recordId);
 
+      // Title with category
       document.getElementById("record-title").innerHTML = `${record.title} <span style="font-weight: normal;">(${record.category})</span>`;
-      document.getElementById("record-content").innerHTML = makeLinksClickable(record.text);
-      document.getElementById("notes-box").innerHTML = makeLinksClickable(record.notes || "");
+
+      // Preserve text formatting and make links clickable
+      const recordContent = document.getElementById("record-content");
+      recordContent.textContent = ""; // Clear existing content
+      recordContent.style.whiteSpace = "pre-wrap"; // Preserve formatting
+      recordContent.innerHTML = makeLinksClickable(record.text); // Add formatted and clickable text
+
+      // Preserve text formatting for notes
+      const notesBox = document.getElementById("notes-box");
+      notesBox.textContent = ""; // Clear existing content
+      notesBox.style.whiteSpace = "pre-wrap"; // Preserve formatting
+      notesBox.innerHTML = makeLinksClickable(record.notes || ""); // Add formatted and clickable notes
 
       if (record.audio) {
         const audio = document.getElementById("audio-player");

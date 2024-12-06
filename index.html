@@ -133,12 +133,14 @@
     .fixed-text {
       position: fixed;
       bottom: 10px;
-      right: 10px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 1rem;
       color: white;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
       font-family: 'Inria Serif', serif;
       z-index: 10;
+      text-align: center;
     }
     
     @media (orientation: landscape) {
@@ -230,8 +232,9 @@
       const query = document.getElementById("search-input").value.trim().toLowerCase();
       populateResults(query || ""); // Show all if the input is empty
     });
+
     // Scroll to the middle of the page
-    window.addEventListener("load", () => {
+    function centerContainer() {
       const container = document.querySelector(".container");
       const containerRect = container.getBoundingClientRect();
       const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
@@ -242,8 +245,11 @@
         top: scrollY > 0 ? scrollY : 0,
         behavior: "auto",
       });
-    });
+    }
+
+    window.addEventListener("load", centerContainer);
+    window.addEventListener("resize", centerContainer);
   </script>
-<div class="fixed-text">Lazzaro - Seminario di Fiesole</div>
+<div class="fixed-text">Lazzaro - S.Fiesole</div>
 </body>
 </html>

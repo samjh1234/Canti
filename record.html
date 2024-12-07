@@ -47,13 +47,26 @@
     }
 
     .title-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      margin-bottom: 3px;
-      padding: 0 10px;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 3px;
+  padding: 0 10px;
+}
+
+.icon-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px; /* Space between the icons */
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
 
     .title-container a {
       display: flex;
@@ -206,7 +219,10 @@
         <span class="arrow"></span>
         <img src="photos/logo.png" alt="Logo">
       </a>
-      <img id="print-icon" src="photos/printer.png" alt="Printer" style="cursor: pointer;">
+      <div class="icon-group">
+        <img id="copy-icon" src="photos/copy.png" alt="Copy" class="icon">
+        <img id="print-icon" src="photos/printer.png" alt="Printer" class="icon">
+      </div>
     </div>
 
     <div class="text-box" id="record-text">
@@ -346,18 +362,183 @@
     window.addEventListener("load", centerContainer);
     window.addEventListener("resize", centerContainer);
 
-    document.getElementById("print-icon").addEventListener("click", () => {
+
+    // Print function
+      document.addEventListener("DOMContentLoaded", () => {
+    const printIcon = document.getElementById("print-icon");
+
+    // Print Button Logic
+    printIcon.addEventListener("click", () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const title = document.getElementById("record-title").innerText;
-      const content = document.getElementById("record-content").innerText;
 
+      // Extract the title, category, content, and notes
+      const titleElement = document.getElementById("record-title");
+      const title = titleElement.innerText.split('(')[0].trim(); // Extract title
+      const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
+      const content = document.getElementById("record-content").innerText.trim();
+      const notes = document.getElementById("notes-box").innerText.trim();
+
+      // Set font and alignment for title
       doc.setFont("helvetica", "bold");
-      doc.text(title, 10, 10);
+      doc.setFontSize(16);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const titleX = pageWidth / 2;
+      doc.text(title, titleX, 20, { align: 'center' });
+
+      // Set font and alignment for category
+      if (category) {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(12);
+        doc.text(`(${category})`, titleX, 30, { align: 'center' });
+      }
+
+      // Set font and alignment for content
       doc.setFont("helvetica", "normal");
-      doc.text(content, 10, 20, { maxWidth: 180 });
-      doc.save("record.pdf");
+      doc.setFontSize(12);
+      const contentY = category ? 40 : 30; // If category exists, start content lower
+      const contentLines = doc.splitTextToSize(content, 180); // Ensure content wraps properly
+      let currentY = contentY;
+      contentLines.forEach((line) => {
+        if (currentY + 10 > pageHeight - 20) {
+          doc.addPage();
+          currentY = 20; // Reset Y on the new page
+        }
+        doc.text(line, pageWidth / 2, currentY, { align: 'center' });
+        currentY += 10;
+      });
+
+      // Export the photo if it exists
+      const photoImg = document.querySelector("#record-content img");
+      if (photoImg) {
+        const image = new Image();
+        image.src = photoImg.src;
+        image.onload = function () {
+          const aspectRatio = image.width / image.height;
+          const maxWidth = 180; // Max width for the image
+          const maxHeight = 100; // Max height for the image
+          let imageWidth = maxWidth;
+          let imageHeight = maxWidth / aspectRatio;
+
+          if (imageHeight > maxHeight) {
+            imageHeight = maxHeight;
+            imageWidth = maxHeight * aspectRatio;
+          }
+
+          const imageX = (pageWidth - imageWidth) / 2;
+          const imageY = currentY + 10; // Add some space after the content
+
+          // Check if there is enough space on the current page for the image
+          if (imageY + imageHeight > pageHeight - 20) {
+            doc.addPage();
+            currentY = 20; // Reset Y on the new page
+          }
+
+          doc.addImage(image.src, 'JPEG', imageX, currentY, imageWidth, imageHeight);
+
+          // Update Y position for notes
+          const noteStartY = currentY + imageHeight + 10;
+          addNotes(doc, notes, noteStartY);
+        };
+      } else {
+        addNotes(doc, notes, currentY + 10); // Add notes directly if no image
+      }
+
+      function addNotes(doc, notesContent, startY) {
+        if (notesContent) {
+          if (startY + 20 > pageHeight - 20) {
+            doc.addPage();
+            startY = 20;
+          }
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(12);
+          doc.text('Note:', pageWidth / 2, startY, { align: 'center' });
+          doc.setFont("helvetica", "normal");
+
+          const notesLines = doc.splitTextToSize(notesContent, 180);
+          let noteY = startY + 10; // Space below "Note:"
+          notesLines.forEach((line) => {
+            if (noteY + 10 > pageHeight - 20) {
+              doc.addPage();
+              noteY = 20; // Reset Y on the new page
+            }
+            doc.text(line, pageWidth / 2, noteY, { align: 'center' });
+            noteY += 10;
+          });
+        }
+
+        // Save the PDF
+        doc.save("record.pdf");
+      }
     });
+
+    // Copy Button Logic
+    copyIcon.addEventListener("click", async () => {
+      try {
+        const titleElement = document.getElementById("record-title");
+        const title = titleElement.innerText.split('(')[0].trim(); // Extract title
+        const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
+        const content = document.getElementById("record-content").innerText.trim();
+
+        // Format the text to be copied
+        let textToCopy = `Title: ${title}\nCategory: ${category}\n\n${content}`;
+
+        await navigator.clipboard.writeText(textToCopy);
+        alert("Title, category, and text have been copied to the clipboard!");
+      } catch (error) {
+        alert("Failed to copy content. Please try again.");
+        console.error("Copy Error:", error);
+      }
+    });
+  });
+  document.addEventListener("DOMContentLoaded", () => {
+  const copyIcon = document.getElementById("copy-icon");
+
+  copyIcon.addEventListener("click", async () => {
+    try {
+      const titleElement = document.getElementById("record-title");
+      const title = titleElement.innerText.split('(')[0].trim(); // Extract title
+      const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
+      const content = document.getElementById("record-content").innerText.trim();
+
+      // Format the text to be copied
+      let textToCopy = `Title: ${title}\nCategory: ${category}\n\n${content}`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        // Use the clipboard API if supported
+        await navigator.clipboard.writeText(textToCopy);
+        alert("Title, category, and text have been copied to the clipboard!");
+      } else {
+        // Fallback for older browsers or insecure context (e.g., http)
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        textArea.style.position = "fixed"; // Avoid scrolling to the bottom
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            alert("Title, category, and text have been copied to the clipboard!");
+          } else {
+            alert("Failed to copy content. Please try again.");
+          }
+        } catch (err) {
+          console.error("Fallback copy failed:", err);
+          alert("Failed to copy content. Please try again.");
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error("Copy Error:", error);
+      alert("Failed to copy content. Please try again.");
+    }
+  });
+});
   </script>
 </body>
 </html>

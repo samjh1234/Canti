@@ -18,8 +18,8 @@ const urlsToCache = [
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js", // Remote jsPDF
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css", // Font Awesome Icons
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff2", // Font Awesome Icons
-  "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js", // PDFMake for PDF
-  "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js", // PDF Fonts
+  "https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap", // Caching Google Font CSS
+  "https://fonts.gstatic.com/s/inriaserif/v9/V8mCoQfRj0c0GFfK8MNhuWODQJ_aN0hH.woff2" // Caching the WOFF2 font file
 ];
 
 self.addEventListener("install", (event) => {

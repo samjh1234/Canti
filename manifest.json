@@ -5,16 +5,23 @@
   "display": "standalone",
   "background_color": "#85C1DC",
   "theme_color": "#85C1DC",
+  "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
-      "src": "/photos/favicon.png",
+      "src": "/photos/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/photos/favicon.png",
+      "src": "/photos/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "Canti & Lyrics - Manage, Export, and Print Song Lyrics. Offline support included.",
+  "categories": ["music", "productivity", "entertainment"],
+  "permissions": ["storage", "clipboard-read", "clipboard-write"],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

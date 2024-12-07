@@ -136,28 +136,28 @@
     }
 
     .buttons-row {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: 5px;
-    }
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+}
 
-    .button {
-      background: rgba(133, 193, 220, 0.5);
-      border: none;
-      padding: 8px;
-      border-radius: 25px;
-      font-size: 1rem;
-      color: white;
-      cursor: pointer;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      width: 48%;
-    }
+.button {
+  background: rgba(133, 193, 220, 0.5);
+  border: none;
+  padding: 8px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 30%; /* Reduced to fit 3 buttons */
+}
 
-    .button:hover {
-      background: rgba(133, 193, 220, 0.8);
-    }
+.button:hover {
+  background: rgba(133, 193, 220, 0.8);
+}
 
     .fixed-text-top {
       position: fixed;
@@ -238,6 +238,7 @@
 
     <div class="buttons-row">
       <button id="attachments" class="button">Allegati</button>
+      <button id="export-share" class="button" style="font-size: 0.7rem;">Condividi-JSON</button>
       <a href="#" id="edit-link" class="button">Modifica</a>
     </div>
   </div>
@@ -538,6 +539,51 @@
       alert("Failed to copy content. Please try again.");
     }
   });
+});
+     // export the record function
+
+     document.addEventListener("DOMContentLoaded", () => {
+
+// Export/Share functionality
+const exportShareButton = document.getElementById("export-share");
+
+exportShareButton.addEventListener("click", async () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const recordId = parseInt(params.get("id"), 10);
+    const record = await db.lyrics.get(recordId);
+
+    if (!record) {
+      alert("No record found to export.");
+      return;
+    }
+
+    // Create a standalone JSON object for the single record
+    const singleRecord = {
+      tableName: "lyrics",
+      data: record
+    };
+
+    // Convert to JSON string and create a downloadable file
+    const jsonString = JSON.stringify(singleRecord, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `record-${record.title.replace(/\s+/g, '_')}.json`; // Filename uses the title of the record
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+    alert("Record esportato come JSON con successo!");
+  } catch (error) {
+    console.error("Export Error:", error);
+    alert("Errore durante l'esportazione del record. Riprova.");
+  }
+});
+
 });
   </script>
 </body>

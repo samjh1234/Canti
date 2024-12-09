@@ -96,22 +96,22 @@
     }
 
     .text-box {
-      width: 100%;
-      height: 450px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      padding: 2px;
-      font-size: 1rem;
-      color: black;
-      text-align: center;
-      overflow-y: auto;
-      margin-bottom: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      white-space: pre-wrap;
-    }
+  width: 100%;
+  height: 450px; /* Fixed height to avoid flex layout issues */
+  max-height: 450px; /* Ensures that the max height is set */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 10px; /* Add some padding to ensure the text is not touching the edges */
+  font-size: 1rem;
+  color: black;
+  text-align: center;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Disable horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+  display: block; /* Ensure layout issues from flex are resolved */
+  white-space: pre-wrap; /* Ensure line breaks are respected */
+  position: relative; /* Important for scroll containment */
+}
 
     .notes-box {
       width: 100%;

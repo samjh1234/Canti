@@ -96,20 +96,22 @@
     }
 
     .text-box {
-  width: 100%;
-  height: 450px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  padding: 10px; /* Add some padding to ensure the text is not touching the edges */
-  font-size: 1rem;
-  color: black;
-  text-align: center;
-  overflow-y: auto; /* Enables vertical scrolling */
-  -webkit-overflow-scrolling: touch; /* Makes scrolling smooth on mobile devices */
-  margin-bottom: 5px;
-  display: block; /* Changed from flex to block to avoid layout issues on mobile */
-  white-space: pre-wrap;
-}
+      width: 100%;
+      height: 450px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 2px;
+      font-size: 1rem;
+      color: black;
+      text-align: center;
+      overflow-y: auto;
+      margin-bottom: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      white-space: pre-wrap;
+    }
 
     .notes-box {
       width: 100%;
@@ -472,14 +474,8 @@
         doc.save("record.pdf");
       }
     });
-}
-
 
     // Copy Button Logic
-        
-    document.addEventListener("DOMContentLoaded", () => {
-    const copyIcon = document.getElementById("copy-icon");
-      
     copyIcon.addEventListener("click", async () => {
       try {
         const titleElement = document.getElementById("record-title");

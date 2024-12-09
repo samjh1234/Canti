@@ -474,6 +474,10 @@
     });
 
     // Copy Button Logic
+        
+    document.addEventListener("DOMContentLoaded", () => {
+    const copyIcon = document.getElementById("copy-icon");
+      
     copyIcon.addEventListener("click", async () => {
       try {
         const titleElement = document.getElementById("record-title");

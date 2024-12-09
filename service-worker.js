@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v3"; // Update version number
+const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number
 const urlsToCache = [
   "/", 
   "/index.html", 

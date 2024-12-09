@@ -474,25 +474,6 @@
         doc.save("record.pdf");
       }
     });
-
-    // Copy Button Logic
-    copyIcon.addEventListener("click", async () => {
-      try {
-        const titleElement = document.getElementById("record-title");
-        const title = titleElement.innerText.split('(')[0].trim(); // Extract title
-        const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
-        const content = document.getElementById("record-content").innerText.trim();
-
-        // Format the text to be copied
-        let textToCopy = `Title: ${title}\nCategory: ${category}\n\n${content}`;
-
-        await navigator.clipboard.writeText(textToCopy);
-        alert("Title, category, and text have been copied to the clipboard!");
-      } catch (error) {
-        alert("Failed to copy content. Please try again.");
-        console.error("Copy Error:", error);
-      }
-    });
   });
   document.addEventListener("DOMContentLoaded", () => {
   const copyIcon = document.getElementById("copy-icon");

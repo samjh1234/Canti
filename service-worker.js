@@ -1,7 +1,8 @@
 const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number
 const urlsToCache = [
   "/", 
-  "/index.html", 
+  "/index.html",
+  "/db.json",
   "/aggiungi.html", 
   "/record.html", 
   "/modifica.html", 

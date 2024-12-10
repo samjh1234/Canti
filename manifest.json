@@ -11,12 +11,12 @@
     {
       "src": "/photos/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/png"
     },
     {
       "src": "/photos/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/png"
     }
   ],
   "description": "Canti & Lyrics - Manage, Export, and Print Song Lyrics. Offline support included.",

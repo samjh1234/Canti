@@ -222,16 +222,54 @@
     }
 
     // Search Input Handler
-    document.getElementById("search-input").addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      populateResults(query);
-    });
+document.getElementById("search-input").addEventListener('input', (e) => {
+  const query = e.target.value.trim().toLowerCase();
+  populateResults(query);
+});
 
-    // "Cerca" Button Handler
-    document.getElementById("search-button").addEventListener('click', () => {
-      const query = document.getElementById("search-input").value.trim().toLowerCase();
-      populateResults(query || ""); // Show all if the input is empty
+// "Cerca" Button Handler
+document.getElementById("search-button").addEventListener('click', () => {
+  const query = document.getElementById("search-input").value.trim().toLowerCase();
+  populateResults(query || ""); // Show all if the input is empty
+});
+
+// Enhanced populateResults function with partial match support
+async function populateResults(query = "") {
+  const resultsBox = document.getElementById("results-box");
+  resultsBox.innerHTML = '';
+
+  // If query is empty, show all records
+  if (!query) {
+    const allResults = await db.lyrics.toArray();
+    displayResults(allResults, resultsBox);
+    return;
+  }
+
+  // Perform partial matching on title, text, notes, and category
+  const results = await db.lyrics.filter(record => {
+    const searchText = `${record.title || ''} ${record.text || ''} ${record.notes || ''} ${record.category || ''}`.toLowerCase();
+    return searchText.includes(query); // Check if the combined text contains the query
+  }).toArray();
+
+  displayResults(results, resultsBox);
+}
+
+// Helper function to display search results
+function displayResults(results, resultsBox) {
+  if (results.length === 0) {
+    resultsBox.textContent = 'Nessun risultato trovato';
+    return;
+  }
+
+  results.forEach(record => {
+    const item = document.createElement('p');
+    item.textContent = record.title || 'Titolo sconosciuto';
+    item.addEventListener('click', () => {
+      window.location.href = `record.html?id=${record.id}`;
     });
+    resultsBox.appendChild(item);
+  });
+}
 
     // Scroll to the middle of the page
     function centerContainer() {
@@ -249,6 +287,42 @@
 
     window.addEventListener("load", centerContainer);
     window.addEventListener("resize", centerContainer);
+
+    async function checkAndPopulateDatabase() {
+  try {
+    const recordsCount = await db.lyrics.count();
+    if (recordsCount === 0) {
+      console.log('Database is empty, populating from JSON file...');
+      
+      // Fetch the JSON file containing the pre-populated data
+      const response = await fetch('db.json');
+      const data = await response.json();
+
+      // Log the data to understand its structure
+      console.log('Full Data:', data);
+      console.log('Data.data:', data.data);
+      
+      // Extract the data for the "lyrics" table from the JSON structure
+      const lyricsData = data.data.data.find(table => table.tableName === 'lyrics').rows;
+
+      if (!lyricsData.length) {
+        throw new Error('No data found in the JSON file to populate the database.');
+      }
+
+      // Insert the data into the Dexie database
+      await db.lyrics.bulkAdd(lyricsData);
+      console.log('Database populated successfully with', lyricsData.length, 'records.');
+    } else {
+      console.log('Database already populated with', recordsCount, 'records.');
+    }
+  } catch (error) {
+    console.error('Failed to populate the database:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAndPopulateDatabase();
+});
   </script>
 <div class="fixed-text">Lazzaro - S.Fiesole</div>
 </body>

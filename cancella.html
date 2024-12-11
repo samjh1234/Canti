@@ -4,14 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#85C1DC">
-  <title>Cancella Records</title>
-
+  <title>Cancella</title>
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
-
   <!-- Dexie.js -->
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
-
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
@@ -46,7 +43,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .arrow {
@@ -77,32 +74,52 @@
       text-align: center;
     }
 
-    .list-box {
+    .search-box {
       width: 100%;
-      height: 400px;
-      background: #f9f9f9;
-      border-radius: 20px;
-      padding: 10px;
-      overflow-y: auto;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
     }
 
-    .list-item {
-      background: #f4f4f9;
-      border-radius: 10px;
+    .search-input {
+      width: 100%;
       padding: 10px;
-      margin-bottom: 5px;
-      cursor: pointer;
-      border: 1px solid #ccc;
+      border-radius: 20px;
+      border: 1px solid #bbb;
+      font-size: 1rem;
       text-align: center;
     }
 
-    .list-item.selected {
-      background: rgba(133, 193, 220, 0.8);
+    .list-box {
+      width: 100%;
+      height: 300px;
+      background: #fff;
+      border-radius: 15px;
+      border: 1px solid #bbb;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-box label {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: block;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .list-box input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 15px;
     }
 
     .button {
-      width: 100%;
+      flex: 1;
       background: rgba(133, 193, 220, 0.5);
       border: none;
       padding: 10px;
@@ -112,28 +129,19 @@
       font-size: 1rem;
       color: #333;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin: 10px 0;
+      margin: 0 5px;
     }
 
     .button:hover {
       background: rgba(133, 193, 220, 0.8);
       color: white;
     }
-
-    .button-row {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .button-small {
-      width: 48%;
-    }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <!-- Title and Navigation -->
+    <!-- Title Section -->
     <div class="title-container">
       <a href="db-admin.html" style="display: flex; align-items: center; text-decoration: none;">
         <span class="arrow"></span>
@@ -142,77 +150,87 @@
       <div class="title">Cancella Records</div>
     </div>
 
-    <!-- List Box -->
-    <div class="list-box" id="list-box"></div>
+    <!-- Search Box -->
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Cerca Record" class="search-input">
+    </div>
 
-    <!-- Buttons Row -->
+    <!-- List Box -->
+    <div class="list-box" id="list-box">
+      <!-- Dynamic records will be populated here -->
+    </div>
+
+    <!-- Buttons -->
     <div class="button-row">
-      <button id="select-all-button" class="button button-small">Seleziona Tutto</button>
-      <button id="delete-button" class="button button-small">Cancella Record</button>
+      <button id="select-all-button" class="button">Seleziona Tutto</button>
+      <button id="delete-button" class="button">Cancella Record</button>
     </div>
   </div>
 
   <script>
-    // Initialize the Dexie Database
     const db = new Dexie("LyricsDatabase");
-
     db.version(2).stores({
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
 
-    const listBox = document.getElementById('list-box');
-    const selectAllButton = document.getElementById('select-all-button');
-    const deleteButton = document.getElementById('delete-button');
-
-    // Load records from the database and display them
-    async function loadRecords() {
+    // Populate the list box with all record titles
+    async function populateListBox() {
+      const listBox = document.getElementById('list-box');
       listBox.innerHTML = '';
       const records = await db.lyrics.toArray();
+
       records.forEach(record => {
-        const item = document.createElement('div');
-        item.classList.add('list-item');
-        item.textContent = record.title || 'Senza Titolo';
-        item.setAttribute('data-id', record.id);
-        item.addEventListener('click', () => item.classList.toggle('selected'));
-        listBox.appendChild(item);
+        const label = document.createElement('label');
+        label.innerHTML = `
+          <input type="checkbox" class="record-checkbox" data-id="${record.id}">
+          ${record.title || 'Titolo Sconosciuto'}
+        `;
+        listBox.appendChild(label);
       });
     }
 
-    // Select/Deselect all records
-    selectAllButton.addEventListener('click', () => {
-      const items = document.querySelectorAll('.list-item');
-      const allSelected = Array.from(items).every(item => item.classList.contains('selected'));
-
-      if (allSelected) {
-        items.forEach(item => item.classList.remove('selected'));
-        selectAllButton.textContent = 'Seleziona Tutto';
-      } else {
-        items.forEach(item => item.classList.add('selected'));
-        selectAllButton.textContent = 'Deseleziona Tutto';
-      }
+    // Filter the list box based on the search input
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      const labels = document.querySelectorAll('#list-box label');
+      labels.forEach(label => {
+        const text = label.textContent.toLowerCase();
+        label.style.display = text.includes(query) ? 'block' : 'none';
+      });
     });
 
-    // Delete selected records
-    deleteButton.addEventListener('click', async () => {
-      const selectedItems = document.querySelectorAll('.list-item.selected');
-      const idsToDelete = Array.from(selectedItems).map(item => parseInt(item.getAttribute('data-id'), 10));
+    // "Seleziona Tutto" Button
+    let isSelectAll = true;
+    document.getElementById('select-all-button').addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      checkboxes.forEach(checkbox => checkbox.checked = isSelectAll);
+      document.getElementById('select-all-button').textContent = isSelectAll ? 'Deselenzionare' : 'Seleziona Tutto';
+      isSelectAll = !isSelectAll;
+    });
 
-      if (idsToDelete.length === 0) {
-        alert('Nessun record selezionato.');
+    // "Cancella Record" Button
+    document.getElementById('delete-button').addEventListener('click', async () => {
+      const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked'))
+        .map(checkbox => parseInt(checkbox.dataset.id));
+
+      if (selectedIds.length === 0) {
+        alert('Nessun record selezionato per la cancellazione.');
         return;
       }
 
-      // Delete records from the database
-      await db.lyrics.bulkDelete(idsToDelete);
+      const confirmation = confirm(`Sei sicuro di voler cancellare ${selectedIds.length} record?`);
+      if (!confirmation) return;
 
-      // Remove items from the list
-      selectedItems.forEach(item => item.remove());
-
-      alert(`${idsToDelete.length} record(s) eliminati.`);
+      await db.lyrics.bulkDelete(selectedIds);
+      alert(`${selectedIds.length} record cancellati con successo.`);
+      populateListBox(); // Refresh the list
     });
 
-    // Load records on page load
-    window.addEventListener('DOMContentLoaded', loadRecords);
+    // Populate the list box when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      populateListBox();
+    });
   </script>
+
 </body>
 </html>

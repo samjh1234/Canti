@@ -9,6 +9,8 @@
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+  <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
+  
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
@@ -240,6 +242,7 @@
 
     <!-- File Upload Buttons -->
     <div class="file-buttons">
+      <button id="scan-button" class="button">Scan</button>
       <label class="file-button">
         Allega Foto
         <input id="photo" type="file" accept="image/*" style="display: none;">
@@ -360,5 +363,6 @@
       });
     }
   </script>
+  <script src="scan.js" defer></script>
 </body>
 </html>

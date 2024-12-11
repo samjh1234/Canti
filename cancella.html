@@ -136,6 +136,16 @@
       background: rgba(133, 193, 220, 0.8);
       color: white;
     }
+
+    .delete-button {
+      background: #e74c3c; /* Red color */
+      color: white;
+    }
+
+    .delete-button:hover {
+      background: #c0392b; /* Darker red color on hover */
+    }
+
   </style>
 </head>
 <body>
@@ -163,7 +173,7 @@
     <!-- Buttons -->
     <div class="button-row">
       <button id="select-all-button" class="button">Seleziona Tutto</button>
-      <button id="delete-button" class="button">Cancella Record</button>
+      <button id="delete-button" class="button delete-button">Cancella Record</button>
     </div>
   </div>
 
@@ -208,6 +218,16 @@
       isSelectAll = !isSelectAll;
     });
 
+    // Listen for manual deselection to update "Seleziona Tutto" status
+    document.getElementById('list-box').addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      const allDeselected = Array.from(checkboxes).every(checkbox => !checkbox.checked);
+      if (allDeselected) {
+        isSelectAll = true;
+        document.getElementById('select-all-button').textContent = 'Seleziona Tutto';
+      }
+    });
+
     // "Cancella Record" Button
     document.getElementById('delete-button').addEventListener('click', async () => {
       const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked'))
@@ -223,10 +243,9 @@
 
       await db.lyrics.bulkDelete(selectedIds);
       alert(`${selectedIds.length} record cancellati con successo.`);
-      populateListBox(); // Refresh the list
+      populateListBox();
     });
 
-    // Populate the list box when the page loads
     document.addEventListener('DOMContentLoaded', () => {
       populateListBox();
     });

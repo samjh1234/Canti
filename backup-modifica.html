@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Modifica Testo</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: #cce7ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: auto;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: #dff3ff;
+      border-radius: 20px;
+      padding: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+
+    .arrow {
+      width: 15px;
+      height: 15px;
+      margin-right: 5px;
+      display: inline-block;
+      border-left: 2px solid black;
+      border-bottom: 2px solid black;
+      transform: rotate(45deg);
+      cursor: pointer;
+    }
+
+    .arrow:hover {
+      border-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .title-container img {
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      margin-left: 10px;
+      color: #333;
+      text-align: center;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .button {
+      flex: 1;
+      margin: 0 5px;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    .button.active {
+      background: rgba(133, 193, 220, 1);
+      color: white;
+    }
+
+    .input-group {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .textarea {
+      width: 100%;
+      height: 275px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-buttons {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .file-button {
+      flex: 1;
+      margin: 0 5px;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    .save-buttons-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .save-button {
+      flex: 1;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-right: 10px;
+    }
+
+    .delete-button {
+      background: rgba(255, 99, 71, 0.5);
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-button:hover {
+      background: rgba(255, 69, 0, 0.8);
+    }
+
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .container {
+        margin-top: 20px;
+        max-height: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title-container">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none;">
+        <span class="arrow"></span>
+        <img src="photos/logo.png" alt="Logo">
+      </a>
+      <div class="title">Modifica Testo</div>
+    </div>
+
+    <div class="button-group">
+      <button id="liturgico" class="button">Gregoriano</button>
+      <button id="canto" class="button">Inno</button>
+      <button id="altro" class="button">Altro</button>
+    </div>
+
+    <div class="input-group">
+      <input id="title" type="text" class="input" placeholder="Titolo">
+    </div>
+    <div class="input-group">
+      <textarea id="text" class="textarea" placeholder="Testo ......."></textarea>
+    </div>
+    <div class="input-group">
+      <input id="notes" type="text" class="input" placeholder="Note">
+    </div>
+
+    <div class="file-buttons">
+      <label class="file-button">
+        Allega Foto
+        <input id="photo" type="file" accept="image/*" style="display: none;">
+      </label>
+      <label class="file-button">
+        Allega Audio
+        <input id="audio" type="file" style="display: none;">
+      </label>
+      <label class="file-button">
+        Allega Doc
+        <input id="doc" type="file" style="display: none;">
+      </label>
+    </div>
+
+    <div class="save-buttons-container">
+      <button id="save" class="save-button">Salva Modifiche</button>
+      <button id="delete" class="delete-button">Elimina</button>
+    </div>
+  </div>
+
+  <script>
+    const db = new Dexie("LyricsDatabase");
+  
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+  
+    let updatedRecord = null; // Temporary record to store changes
+  
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+  
+      // Correct the back arrow and logo dynamic link
+      const backLink = document.querySelector(".title-container a");
+      if (backLink && recordId) {
+        backLink.href = `record.html?id=${recordId}`;
+      }
+  
+      // Scroll to the middle of the page
+      const container = document.querySelector(".container");
+      const containerRect = container.getBoundingClientRect();
+      const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+      const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+  
+      window.scrollTo({
+        left: scrollX > 0 ? scrollX : 0,
+        top: scrollY > 0 ? scrollY : 0,
+        behavior: "auto",
+      });
+  
+      // Load record data
+      const record = await db.lyrics.get(recordId);
+      updatedRecord = { ...record }; // Create a copy for temporary updates
+  
+      if (record) {
+        document.getElementById("title").value = record.title || "";
+        document.getElementById("text").value = record.text || "";
+        document.getElementById("notes").value = record.notes || "";
+  
+        // Handle Category Buttons
+        const categoryButtons = document.querySelectorAll(".button");
+        categoryButtons.forEach((button) => {
+          button.classList.toggle("active", button.textContent === record.category);
+  
+          button.addEventListener("click", async () => {
+            categoryButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+  
+            if (button.textContent === "Altro") {
+              const customCategory = prompt("Inserisci manualmente il nome della categoria:");
+              if (customCategory) {
+                updatedRecord.category = customCategory; // Save the user-inputted category
+                alert(`Categoria impostata come: "${customCategory}"`);
+              } else {
+                button.classList.remove("active"); // Deselect "Altro" if no input
+              }
+            } else {
+              updatedRecord.category = button.textContent; // Save predefined category
+            }
+          });
+        });
+  
+        const handleFileClick = (fieldId, existingFieldName) => {
+          const input = document.getElementById(fieldId);
+          input.addEventListener("click", (e) => {
+            if (updatedRecord[existingFieldName]) {
+              const action = prompt(
+                `File già presente. Scegli un'opzione:\n1. Sostituisci il file\n2. Elimina il file\n\nAnnulla per non fare nulla.`
+              );
+  
+              if (action === "2") {
+                updatedRecord[existingFieldName] = null;
+                updatedRecord[`${existingFieldName}Type`] = null;
+                alert(`${existingFieldName} contrassegnato per eliminazione.`);
+                e.preventDefault(); // Prevent opening file dialog
+              } else if (action !== "1") {
+                e.preventDefault(); // Cancel the file input click if the user selects "Annulla."
+              }
+            }
+          });
+        };
+  
+        handleFileClick("photo", "photo");
+        handleFileClick("audio", "audio");
+        handleFileClick("doc", "doc");
+      }
+    });
+  
+    document.getElementById("save").addEventListener("click", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+  
+      const title = document.getElementById("title").value;
+      const text = document.getElementById("text").value;
+      const notes = document.getElementById("notes").value;
+      const photoFile = document.getElementById("photo").files[0];
+      const audioFile = document.getElementById("audio").files[0];
+      const docFile = document.getElementById("doc").files[0];
+  
+      if (!title || !text) {
+        alert("Titolo e Testo sono obbligatori!");
+        return;
+      }
+  
+      updatedRecord.title = title;
+      updatedRecord.text = text;
+      updatedRecord.notes = notes;
+  
+      if (photoFile) {
+        updatedRecord.photo = await fileToBase64(photoFile);
+        updatedRecord.photoType = photoFile.type;
+      }
+      if (audioFile) {
+        updatedRecord.audio = await fileToBase64(audioFile);
+        updatedRecord.audioType = audioFile.type;
+      }
+      if (docFile) {
+        updatedRecord.doc = await fileToBase64(docFile);
+        updatedRecord.docType = docFile.type;
+      }
+  
+      await db.lyrics.put(updatedRecord);
+      alert("Modifiche salvate con successo!");
+      window.location.href = `record.html?id=${recordId}`;
+    });
+  
+    document.getElementById("delete").addEventListener("click", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+  
+      const confirmDelete = confirm("Sei sicuro di voler eliminare questo record?");
+      if (!confirmDelete) return;
+  
+      await db.lyrics.delete(recordId);
+      alert("Record eliminato con successo!");
+      window.location.href = "index.html";
+    });
+  
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>

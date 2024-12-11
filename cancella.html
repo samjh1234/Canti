@@ -9,6 +9,9 @@
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
 
+  <!-- Dexie.js -->
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
@@ -140,9 +143,7 @@
     </div>
 
     <!-- List Box -->
-    <div class="list-box" id="list-box">
-      <!-- List items will be populated dynamically -->
-    </div>
+    <div class="list-box" id="list-box"></div>
 
     <!-- Buttons Row -->
     <div class="button-row">
@@ -152,39 +153,66 @@
   </div>
 
   <script>
-    // Example items for the list box (for demo purposes)
-    const listItems = [
-      'Record 1',
-      'Record 2',
-      'Record 3',
-      'Record 4',
-      'Record 5'
-    ];
+    // Initialize the Dexie Database
+    const db = new Dexie("LyricsDatabase");
 
-    // Populate the list box with items
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+
     const listBox = document.getElementById('list-box');
+    const selectAllButton = document.getElementById('select-all-button');
+    const deleteButton = document.getElementById('delete-button');
 
-    listItems.forEach((itemText, index) => {
-      const item = document.createElement('div');
-      item.classList.add('list-item');
-      item.textContent = itemText;
-      item.addEventListener('click', () => item.classList.toggle('selected'));
-      listBox.appendChild(item);
-    });
+    // Load records from the database and display them
+    async function loadRecords() {
+      listBox.innerHTML = '';
+      const records = await db.lyrics.toArray();
+      records.forEach(record => {
+        const item = document.createElement('div');
+        item.classList.add('list-item');
+        item.textContent = record.title || 'Senza Titolo';
+        item.setAttribute('data-id', record.id);
+        item.addEventListener('click', () => item.classList.toggle('selected'));
+        listBox.appendChild(item);
+      });
+    }
 
-    // "Seleziona Tutto" Button
-    document.getElementById('select-all-button').addEventListener('click', () => {
+    // Select/Deselect all records
+    selectAllButton.addEventListener('click', () => {
       const items = document.querySelectorAll('.list-item');
-      items.forEach(item => item.classList.add('selected'));
+      const allSelected = Array.from(items).every(item => item.classList.contains('selected'));
+
+      if (allSelected) {
+        items.forEach(item => item.classList.remove('selected'));
+        selectAllButton.textContent = 'Seleziona Tutto';
+      } else {
+        items.forEach(item => item.classList.add('selected'));
+        selectAllButton.textContent = 'Deseleziona Tutto';
+      }
     });
 
-    // "Cancella Record" Button
-    document.getElementById('delete-button').addEventListener('click', () => {
+    // Delete selected records
+    deleteButton.addEventListener('click', async () => {
       const selectedItems = document.querySelectorAll('.list-item.selected');
-      selectedItems.forEach(item => item.remove());
-      alert(`${selectedItems.length} record(s) deleted.`);
-    });
-  </script>
+      const idsToDelete = Array.from(selectedItems).map(item => parseInt(item.getAttribute('data-id'), 10));
 
+      if (idsToDelete.length === 0) {
+        alert('Nessun record selezionato.');
+        return;
+      }
+
+      // Delete records from the database
+      await db.lyrics.bulkDelete(idsToDelete);
+
+      // Remove items from the list
+      selectedItems.forEach(item => item.remove());
+
+      alert(`${idsToDelete.length} record(s) eliminati.`);
+    });
+
+    // Load records on page load
+    window.addEventListener('DOMContentLoaded', loadRecords);
+  </script>
 </body>
 </html>

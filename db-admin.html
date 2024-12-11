@@ -114,7 +114,8 @@
     <input id="restore-input" type="file" accept=".json">
     <button id="restore-btn" class="button">Restore Database</button>
     <input id="restore-record-input" type="file" accept=".json" style="display: none;">
-<button id="restore-record-btn" class="button">Add Record from JSON</button>
+    <button id="restore-record-btn" class="button">Add Record from JSON</button>
+    <button id="delete-records-button" class="button">Cancella Records</button>
     <button id="info-btn" class="button">Get DB Info</button>
   </div>
 
@@ -284,6 +285,10 @@ document.getElementById("restore-record-input").addEventListener("change", async
     console.error("Restore Error:", error);
     alert("Restore failed. Please try again.");
   }
+});
+    // Event Listener for "Cancella Records" Button
+document.getElementById("delete-records-button").addEventListener("click", () => {
+  window.location.href = "cancella.html";
 });
   </script>
 </body>

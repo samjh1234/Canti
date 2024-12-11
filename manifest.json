@@ -1,7 +1,7 @@
 {
   "name": "Canti & Lyrics",
   "short_name": "Canti",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#85C1DC",
   "theme_color": "#85C1DC",

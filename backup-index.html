@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Canti & Lyrics</title>
+
+  <!-- Link to manifest -->
+  <link rel="manifest" href="manifest.json">
+  <!-- Favicon -->
+  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <!-- Dexie.js -->
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+  <!-- Inline Styles -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: url('photos/backgroundfo.png') no-repeat center center/cover;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+    }
+
+    .container {
+      width: 360px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      justify-content: space-between;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .title {
+      font-size: 2rem;
+      color: white;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .button {
+      flex: 1;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 25px;
+      margin: 0 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      text-decoration: none; /* For link buttons */
+      text-align: center;
+      display: inline-block;
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+    }
+
+    .search-box {
+      width: 100%;
+      margin: 15px 0;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.5);
+      color: black;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .results-box {
+      width: 100%;
+      height: 60%;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      color: white;
+      text-align: center;
+      font-size: 1.2rem;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .results-box p {
+      cursor: pointer;
+      margin: 5px 0;
+    }
+
+    .results-box p:hover {
+      text-decoration: underline;
+    }
+
+    .show-all-button {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .fixed-text {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      font-family: 'Inria Serif', serif;
+      z-index: 10;
+      text-align: center;
+    }
+    
+    @media (orientation: landscape) {
+      body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        height: auto;
+        overflow-x: auto;
+      }
+
+      .container {
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Project Title -->
+    <h1 class="title">Canti & Lyrics</h1>
+    
+    <!-- Buttons -->
+    <div class="button-group">
+      <button id="search-button" class="button">Cerca</button>
+      <a href="aggiungi.html" class="button">Aggiungi</a>
+    </div>
+  
+    <!-- Search Box -->
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Ricerca" class="search-input">
+    </div>
+  
+    <!-- Results Box -->
+    <div class="results-box" id="results-box">
+      <p>Risultati della ricerca</p>
+    </div>
+  </div>
+
+  <!-- Inline Script -->
+  <script>
+    const db = new Dexie("LyricsDatabase");
+
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+
+    // Function to populate the results-box dynamically
+    async function populateResults(query = "") {
+      const resultsBox = document.getElementById("results-box");
+      resultsBox.innerHTML = '';
+
+      const results = query
+        ? await db.lyrics
+            .where('title')
+            .startsWithIgnoreCase(query)
+            .or('text')
+            .startsWithIgnoreCase(query)
+            .or('notes')
+            .startsWithIgnoreCase(query)
+            .or('category')
+            .startsWithIgnoreCase(query)
+            .toArray()
+        : await db.lyrics.toArray(); // If no query, fetch all records
+
+      if (results.length === 0) {
+        resultsBox.textContent = 'Nessun risultato trovato';
+        return;
+      }
+
+      results.forEach(record => {
+        const item = document.createElement('p');
+        item.textContent = record.title || 'Titolo sconosciuto';
+        item.addEventListener('click', () => {
+          window.location.href = `record.html?id=${record.id}`;
+        });
+        resultsBox.appendChild(item);
+      });
+    }
+
+    // Search Input Handler
+document.getElementById("search-input").addEventListener('input', (e) => {
+  const query = e.target.value.trim().toLowerCase();
+  populateResults(query);
+});
+
+// "Cerca" Button Handler
+document.getElementById("search-button").addEventListener('click', () => {
+  const query = document.getElementById("search-input").value.trim().toLowerCase();
+  populateResults(query || ""); // Show all if the input is empty
+});
+
+// Enhanced populateResults function with partial match support
+async function populateResults(query = "") {
+  const resultsBox = document.getElementById("results-box");
+  resultsBox.innerHTML = '';
+
+  // If query is empty, show all records
+  if (!query) {
+    const allResults = await db.lyrics.toArray();
+    displayResults(allResults, resultsBox);
+    return;
+  }
+
+  // Perform partial matching on title, text, notes, and category
+  const results = await db.lyrics.filter(record => {
+    const searchText = `${record.title || ''} ${record.text || ''} ${record.notes || ''} ${record.category || ''}`.toLowerCase();
+    return searchText.includes(query); // Check if the combined text contains the query
+  }).toArray();
+
+  displayResults(results, resultsBox);
+}
+
+// Helper function to display search results
+function displayResults(results, resultsBox) {
+  if (results.length === 0) {
+    resultsBox.textContent = 'Nessun risultato trovato';
+    return;
+  }
+
+  results.forEach(record => {
+    const item = document.createElement('p');
+    item.textContent = record.title || 'Titolo sconosciuto';
+    item.addEventListener('click', () => {
+      window.location.href = `record.html?id=${record.id}`;
+    });
+    resultsBox.appendChild(item);
+  });
+}
+
+    // Scroll to the middle of the page
+    function centerContainer() {
+      const container = document.querySelector(".container");
+      const containerRect = container.getBoundingClientRect();
+      const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+      const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+
+      window.scrollTo({
+        left: scrollX > 0 ? scrollX : 0,
+        top: scrollY > 0 ? scrollY : 0,
+        behavior: "auto",
+      });
+    }
+
+    window.addEventListener("load", centerContainer);
+    window.addEventListener("resize", centerContainer);
+
+    async function checkAndPopulateDatabase() {
+  try {
+    const recordsCount = await db.lyrics.count();
+    if (recordsCount === 0) {
+      console.log('Database is empty, populating from JSON file...');
+      
+      // Fetch the JSON file containing the pre-populated data
+      const response = await fetch('db.json');
+      const data = await response.json();
+
+      // Log the data to understand its structure
+      console.log('Full Data:', data);
+      console.log('Data.data:', data.data);
+      
+      // Extract the data for the "lyrics" table from the JSON structure
+      const lyricsData = data.data.data.find(table => table.tableName === 'lyrics').rows;
+
+      if (!lyricsData.length) {
+        throw new Error('No data found in the JSON file to populate the database.');
+      }
+
+      // Insert the data into the Dexie database
+      await db.lyrics.bulkAdd(lyricsData);
+      console.log('Database populated successfully with', lyricsData.length, 'records.');
+    } else {
+      console.log('Database already populated with', recordsCount, 'records.');
+    }
+  } catch (error) {
+    console.error('Failed to populate the database:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAndPopulateDatabase();
+});
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    });
+  }
+  </script>
+<div class="fixed-text">Lazzaro - S.Fiesole</div>
+</body>
+</html>

@@ -9,7 +9,8 @@
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
-
+  <script async src="https://docs.opencv.org/4.x/opencv.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
 
@@ -246,6 +247,10 @@
 
     <div class="file-buttons">
       <label class="file-button">
+        Scan
+      <input id="scan-button" type="file" style="display: none;">
+      </label>
+      <label class="file-button">
         Allega Foto
         <input id="photo" type="file" accept="image/*" style="display: none;">
       </label>
@@ -412,6 +417,114 @@
         reader.readAsDataURL(file);
       });
     }
+
+    // button scan
+    document.getElementById('scan-button').addEventListener('click', handleScanButton);
+
+    // Function for the "Scan" button
+async function handleScanButton() {
+  // Create and configure the video element for live preview
+  const video = document.createElement('video');
+  video.style.width = '100%';
+  video.style.height = '100%';
+  video.autoplay = true;
+
+  try {
+    // Request access to the device's camera
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    document.body.appendChild(video);
+
+    // Create a "Scatta Foto" button to capture the image
+    const captureButton = document.createElement('button');
+    captureButton.textContent = 'Scatta Foto';
+    captureButton.style.position = 'fixed';
+    captureButton.style.bottom = '10px';
+    captureButton.style.left = '50%';
+    captureButton.style.transform = 'translateX(-50%)';
+    captureButton.style.padding = '10px 20px';
+    captureButton.style.fontSize = '1rem';
+    captureButton.style.backgroundColor = '#3498db';
+    captureButton.style.color = 'white';
+    captureButton.style.border = 'none';
+    captureButton.style.borderRadius = '25px';
+    captureButton.style.cursor = 'pointer';
+    document.body.appendChild(captureButton);
+
+    // Capture and process the photo when button is clicked
+    captureButton.addEventListener('click', async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw the current video frame to the canvas
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the image as Base64
+      const imageDataUrl = canvas.toDataURL('image/png');
+
+      // Use OpenCV.js to process the image
+      cv.onRuntimeInitialized = () => {
+        let src = cv.imread(canvas);
+        let dst = new cv.Mat();
+        let edges = new cv.Mat();
+
+        // Convert to grayscale
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
+        
+        // Detect edges using Canny edge detection
+        cv.Canny(dst, edges, 50, 150, 3, false);
+
+        // Display edges on the canvas
+        cv.imshow(canvas, edges);
+
+        // Clean up
+        src.delete();
+        dst.delete();
+        edges.delete();
+      };
+
+      // Show a preview of the captured image
+      const imagePreview = document.createElement('img');
+      imagePreview.src = imageDataUrl;
+      imagePreview.style.width = '100%';
+      imagePreview.style.marginTop = '10px';
+      document.body.appendChild(imagePreview);
+
+      // Stop the video stream
+      video.pause();
+      video.srcObject.getTracks().forEach(track => track.stop());
+      document.body.removeChild(video);
+      document.body.removeChild(captureButton);
+
+      // Save the scanned image in the Dexie database
+      const db = new Dexie("LyricsDatabase");
+      db.version(2).stores({
+        lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+      });
+
+      try {
+        await db.lyrics.add({
+          title: 'Scanned Document',
+          photo: imageDataUrl,
+          photoType: 'image/png',
+          text: 'Documento scansionato con la fotocamera del telefono.'
+        });
+
+        alert('Foto scansionata e salvata con successo!');
+      } catch (error) {
+        console.error('Errore durante il salvataggio della foto', error);
+        alert('Errore durante il salvataggio della foto. Riprova.');
+      }
+    });
+  } catch (error) {
+    console.error('Errore nell\'accesso alla fotocamera', error);
+    alert('Errore nell\'accesso alla fotocamera. Verifica le autorizzazioni.');
+  }
+}
+
+    
   </script>
 </body>
 </html>

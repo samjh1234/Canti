@@ -1,22 +1,23 @@
-const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number
+const CACHE_NAME = "lyrics-pwa-cache-v5"; // Update version number
 const urlsToCache = [
   "/", 
-  "/index.html",
-  "/db.json",
-  "/aggiungi.html", 
-  "/record.html", 
-  "/modifica.html", 
-  "/db-admin.html", 
-  "/photos/favicon.png", 
-  "/photos/icon-192x192.png", 
-  "/photos/icon-512x512.png", 
-  "/photos/backgroundfo.png", 
-  "/photos/printer.png", 
-  "/photos/copy.png", 
-  "/manifest.json", 
-  "/offline.html", // Ensure you have an offline.html file
-  "/unpkg.com/dexie@3.2.2/dist/dexie.min.js", 
-  "/unpkg.com/jspdf@2.4.0/dist/jspdf.umd.min.js", 
+  "index.html",
+  "db.json",
+  "aggiungi.html", 
+  "record.html", 
+  "modifica.html", 
+  "db-admin.html",
+  "cancella.html",
+  "photos/favicon.png", 
+  "photos/logo.png", 
+  "photos/icon-512x512.png", 
+  "photos/backgroundfo.png", 
+  "photos/printer.png", 
+  "photos/copy.png", 
+  "manifest.json", 
+  "offline.html", // Ensure you have an offline.html file
+  "https://unpkg.com/dexie@3.2.2/dist/dexie.min.js", 
+  "https://unpkg.com/jspdf@2.4.0/dist/jspdf.umd.min.js", 
   "https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap", 
   "https://fonts.gstatic.com/s/inriaserif/v9/V8mCoQfRj0c0GFfK8MNhuWODQJ_aN0hH.woff2"
 ];

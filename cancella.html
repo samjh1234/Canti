@@ -20,29 +20,27 @@
 
     body {
       font-family: 'Inria Serif', serif;
-      background: url('photos/backgroundfo.png') no-repeat center center/cover;
       height: 100vh;
       width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
+      background-color: #F4F4F9;
     }
 
     .container {
       width: 90%;
       max-width: 360px;
       height: 600px;
-      background: rgba(255, 255, 255, 0.1);
+      background: #FFFFFF;
       border-radius: 20px;
-      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 5px;
       justify-content: space-between;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
     }
 
     .title-container {
@@ -85,7 +83,7 @@
       width: 100%;
       height: 450px;
       max-height: 450px;
-      background: rgba(255, 255, 255, 0.2);
+      background: #F9F9F9;
       border-radius: 15px;
       padding: 10px;
       font-size: 1rem;
@@ -98,11 +96,12 @@
     }
 
     .list-box-item {
-      background: rgba(255, 255, 255, 0.8);
+      background: #F4F4F9;
       border-radius: 10px;
       padding: 10px;
       margin-bottom: 5px;
       cursor: pointer;
+      border: 1px solid #ccc;
     }
 
     .list-box-item.selected {
@@ -117,7 +116,7 @@
     }
 
     .button {
-      background: rgba(133, 193, 220, 0.5);
+      background: rgba(133, 193, 220, 0.8);
       border: none;
       padding: 10px;
       border-radius: 25px;
@@ -130,19 +129,7 @@
     }
 
     .button:hover {
-      background: rgba(133, 193, 220, 0.8);
-    }
-
-    .fixed-text-bottom {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1rem;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-      font-family: 'Inria Serif', serif;
-      z-index: 10;
+      background: rgba(133, 193, 220, 1);
     }
 
     @media (orientation: landscape) {
@@ -164,8 +151,6 @@
   </style>
 </head>
 <body>
-  <!-- Fixed Top Text -->
-  <div class="fixed-text-top">Canti & Lyrics</div>
 
   <div class="container">
     <!-- Title with Back Arrow and Logo -->
@@ -187,9 +172,6 @@
       <button id="delete-button" class="button">Cancella Record</button>
     </div>
   </div>
-
-  <!-- Fixed Bottom Text -->
-  <div class="fixed-text-bottom">Lazzaro - S.Fiesole</div>
 
   <script>
     // Example items for the list box (for demo purposes)
@@ -225,5 +207,6 @@
       alert(`${selectedItems.length} record(s) deleted.`);
     });
   </script>
+
 </body>
 </html>

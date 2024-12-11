@@ -15,11 +15,7 @@ const urlsToCache = [
   "photos/printer.png", 
   "photos/copy.png", 
   "manifest.json", 
-  "offline.html", // Ensure you have an offline.html file
-  "https://unpkg.com/dexie@3.2.2/dist/dexie.min.js",  
-  "https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap",
-  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js",
-  "https://cdn.jsdelivr.net/npm/dexie-export-import/dist/dexie-export-import.min.js"
+  "offline.html"
 ];
 
 // Install event - Cache core files

@@ -16,10 +16,10 @@ const urlsToCache = [
   "photos/copy.png", 
   "manifest.json", 
   "offline.html", // Ensure you have an offline.html file
-  "https://unpkg.com/dexie@3.2.2/dist/dexie.min.js", 
-  "https://unpkg.com/jspdf@2.4.0/dist/jspdf.umd.min.js", 
-  "https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap", 
-  "https://fonts.gstatic.com/s/inriaserif/v9/V8mCoQfRj0c0GFfK8MNhuWODQJ_aN0hH.woff2"
+  "https://unpkg.com/dexie@3.2.2/dist/dexie.min.js",  
+  "https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js",
+  "https://cdn.jsdelivr.net/npm/dexie-export-import/dist/dexie-export-import.min.js"
 ];
 
 // Install event - Cache core files

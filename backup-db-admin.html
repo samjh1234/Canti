@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>DB Admin</title>
+  <!-- Favicon -->
+  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <!-- Dexie and Dexie Export-Import -->
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dexie-export-import/dist/dexie-export-import.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: #cce7ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: #dff3ff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .arrow {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      display: inline-block;
+      border-left: 2px solid black;
+      border-bottom: 2px solid black;
+      transform: rotate(45deg);
+      cursor: pointer;
+    }
+
+    .arrow:hover {
+      border-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .title-container img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      color: #333;
+      text-align: center;
+    }
+
+    .button {
+      width: 100%;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 10px 0;
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title-container">
+      <a href="aggiungi.html" style="display: flex; align-items: center; text-decoration: none;">
+        <span class="arrow"></span>
+        <img src="photos/logo.png" alt="Logo">
+      </a>
+      <div class="title">Database Administration</div>
+    </div>
+
+    <button id="backup-btn" class="button">Backup Database</button>
+    <input id="restore-input" type="file" accept=".json">
+    <button id="restore-btn" class="button">Restore Database</button>
+    <input id="restore-record-input" type="file" accept=".json" style="display: none;">
+    <button id="restore-record-btn" class="button">Add Record from JSON</button>
+    <button id="delete-records-button" class="button">Cancella Records</button>
+    <button id="info-btn" class="button">Get DB Info</button>
+  </div>
+
+  <script>
+    // Initialize Dexie database with updated schema
+    const db = new Dexie("LyricsDatabase");
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+
+    // Backup Database
+    document.getElementById("backup-btn").addEventListener("click", async () => {
+      try {
+        const blob = await db.export();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "backup.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+
+        alert("Backup completed successfully!");
+      } catch (error) {
+        console.error("Backup Error:", error);
+        alert("Backup failed. Please try again.");
+      }
+    });
+
+// Restore Database with Chunked Importing
+document.getElementById("restore-btn").addEventListener("click", () => {
+  document.getElementById("restore-input").click();
+});
+
+document.getElementById("restore-input").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    alert("No file selected for restore.");
+    return;
+  }
+
+  try {
+    // Create a file reader to read the backup JSON
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const backupData = JSON.parse(e.target.result);
+
+      // Ensure the structure is valid
+      if (!backupData || backupData.formatName !== 'dexie' || backupData.formatVersion !== 1) {
+        alert("Invalid backup file structure.");
+        return;
+      }
+
+      const dbName = backupData.data.databaseName;
+      const dbVersion = backupData.data.databaseVersion;
+      const tablesData = backupData.data.data;
+
+      // Iterate through tables in the backup data and insert rows
+      await db.transaction("rw", db.tables, async () => {
+        for (const tableData of tablesData) {
+          const tableName = tableData.tableName;
+          const table = db.table(tableName);
+
+          if (!table) {
+            console.error(`Table ${tableName} does not exist in the database.`);
+            continue;
+          }
+
+          // Insert rows from the backup data into the corresponding table
+          const rows = tableData.rows || [];
+          await table.bulkPut(rows);
+        }
+      });
+
+      alert("Database restored successfully!");
+    };
+
+    reader.readAsText(file);
+  } catch (error) {
+    console.error("Restore Error:", error);
+    alert("Restore failed. Please try again.");
+  }
+});
+    // Get DB Info
+    document.getElementById("info-btn").addEventListener("click", async () => {
+      try {
+        const tableInfo = await Promise.all(
+          db.tables.map(async (table) => {
+            const count = await table.count();
+            return { tableName: table.name, count };
+          })
+        );
+
+        let info = `Database Name: ${db.name}\n\n`;
+
+        tableInfo.forEach(({ tableName, count }) => {
+          info += `Table: ${tableName}, Records: ${count}\n`;
+        });
+
+        // Estimate database size
+        const sizeEstimate = await estimateDBSize(db);
+        info += `\nEstimated Database Size: ${sizeEstimate} bytes`;
+
+        alert(info);
+      } catch (error) {
+        console.error("Error fetching DB Info:", error);
+        alert("Failed to retrieve database information. Please try again.");
+      }
+    });
+
+    // Helper Function to Estimate DB Size
+    async function estimateDBSize(db) {
+      let size = 0;
+      for (const table of db.tables) {
+        const records = await table.toArray();
+        size += JSON.stringify(records).length; // Add size of all records in the table
+      }
+      return size;
+    }
+
+    // Attach event listener to the "Restore Record" button
+document.getElementById("restore-record-btn").addEventListener("click", () => {
+  document.getElementById("restore-record-input").click();
+});
+
+// Handle the file selection and processing
+document.getElementById("restore-record-input").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    alert("No file selected for restore.");
+    return;
+  }
+
+  try {
+    // Create a file reader to read the record JSON file
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const recordData = JSON.parse(e.target.result);
+
+      // Ensure the structure is valid
+      if (!recordData || !recordData.tableName || !recordData.data) {
+        alert("Invalid record file structure.");
+        return;
+      }
+
+      const tableName = recordData.tableName;
+      const record = recordData.data;
+
+      // Check if the table exists in the database
+      const table = db.table(tableName);
+      if (!table) {
+        alert(`Table ${tableName} does not exist in the database.`);
+        return;
+      }
+
+      // Insert the record into the corresponding table
+      await table.add(record);
+
+      alert("Record added successfully!");
+    };
+
+    reader.readAsText(file);
+  } catch (error) {
+    console.error("Restore Error:", error);
+    alert("Restore failed. Please try again.");
+  }
+});
+    // Event Listener for "Cancella Records" Button
+document.getElementById("delete-records-button").addEventListener("click", () => {
+  window.location.href = "cancella.html";
+});
+  </script>
+</body>
+</html>

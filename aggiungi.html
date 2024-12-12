@@ -9,7 +9,6 @@
   <!-- Favicon -->
   <link rel="icon" href="photos/favicon.png" type="image/png">
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
-  <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
   
 
   <style>
@@ -363,6 +362,15 @@
       });
     }
   </script>
-  <script src="scan.js" defer></script>
+  
+  <!-- Load OpenCV.js from CDN -->
+  <script async src="https://docs.opencv.org/4.x/opencv.js" onload="cv['onRuntimeInitialized']=()=>{console.log('OpenCV ready!')}"></script>
+  
+  <!-- Load Tesseract.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+  
+  <!-- Link the scan.js file (this file will contain all the logic for the scan button) -->
+  <script src="js/scan.js" defer></script>
+  
 </body>
 </html>

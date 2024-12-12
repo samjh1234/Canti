@@ -1,8 +1,8 @@
-const CACHE_NAME = "lyrics-pwa-cache-v6"; // Update version number
+const CACHE_NAME = "lyrics-pwa-cache-v8"; // Update version number when necessary
 const urlsToCache = [
   "/", 
   "index.html",
-  "db.json",
+  "db.json", // Cache the JSON file
   "aggiungi.html", 
   "record.html", 
   "modifica.html", 
@@ -18,7 +18,7 @@ const urlsToCache = [
   "offline.html"
 ];
 
-// Install event - Cache core files
+// INSTALL - Cache core files
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -30,32 +30,21 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Fetch event - Cache then network strategy
+// FETCH - Cache-first strategy, fallback to network
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
-        return response; // Serve from cache
+        return response; // Serve from cache if available
       }
 
-      // Allow fetch requests for JSON or PDF files (like exported records) to bypass cache
       const requestUrl = new URL(event.request.url);
       const fileExtension = requestUrl.pathname.split('.').pop();
       if (fileExtension === 'json' || fileExtension === 'pdf') {
-        return fetch(event.request); // Never cache exported files
+        console.log(`Fetching ${event.request.url} from network`);
+        return fetch(event.request);
       }
 
-      // Use network-first strategy for HTML files to always get the latest updates
-      if (event.request.mode === 'navigate') {
-        return fetch(event.request).then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        }).catch(() => caches.match("/offline.html")); // Fallback to offline page
-      }
-
-      // Cache dynamically (only cache same-origin requests, avoid third-party requests)
       return fetch(event.request).then((networkResponse) => {
         if (
           event.request.url.startsWith(self.location.origin) && 
@@ -76,7 +65,7 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Activate event - Delete old caches and activate new cache
+// ACTIVATE - Clean old caches
 self.addEventListener("activate", (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -93,6 +82,5 @@ self.addEventListener("activate", (event) => {
       console.log("Cache cleanup complete.");
     })
   );
-  // Take control of open pages immediately (no need for reload)
   self.clients.claim();
 });

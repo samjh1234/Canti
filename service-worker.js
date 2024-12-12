@@ -1,8 +1,8 @@
-const CACHE_NAME = "lyrics-pwa-cache-v8"; // Update version number when necessary
+const CACHE_NAME = "lyrics-pwa-cache-v9"; // Update version number to invalidate old caches
 const urlsToCache = [
   "/", 
   "index.html",
-  "db.json", // Cache the JSON file
+  "db.json", // Cache db.json for offline use
   "aggiungi.html", 
   "record.html", 
   "modifica.html", 
@@ -15,10 +15,10 @@ const urlsToCache = [
   "photos/printer.png", 
   "photos/copy.png", 
   "manifest.json", 
-  "offline.html"
+  "offline.html" // This file should exist to display an offline message
 ];
 
-// INSTALL - Cache core files
+// Install event - Cache core files
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -30,42 +30,67 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// FETCH - Cache-first strategy, fallback to network
+// Fetch event - Cache then network strategy
 self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+
+  // Handle requests for record.html to ensure it works offline
+  if (url.pathname.includes('record.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+        .catch(() => caches.match(event.request)) // Serve from cache if network fails
+    );
+    return;
+  }
+
+  // Handle requests for db.json - Use cache-first strategy
+  if (url.pathname.includes('db.json')) {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        if (response) {
+          console.log("Serving db.json from cache");
+          return response; // Serve from cache
+        }
+        return fetch(event.request)
+          .then(networkResponse => {
+            return caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, networkResponse.clone());
+              console.log("db.json cached for offline use");
+              return networkResponse;
+            });
+          })
+          .catch((error) => {
+            console.error("Failed to fetch db.json:", error);
+            return caches.match("/offline.html"); // Fallback to offline page if available
+          });
+      })
+    );
+    return;
+  }
+
+  // For all other files, serve them from cache first, then fallback to network
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
-        return response; // Serve from cache if available
+        return response; // Serve from cache
       }
-
-      const requestUrl = new URL(event.request.url);
-      const fileExtension = requestUrl.pathname.split('.').pop();
-      if (fileExtension === 'json' || fileExtension === 'pdf') {
-        console.log(`Fetching ${event.request.url} from network`);
-        return fetch(event.request);
-      }
-
-      return fetch(event.request).then((networkResponse) => {
-        if (
-          event.request.url.startsWith(self.location.origin) && 
-          !event.request.url.includes('json') && 
-          !event.request.url.includes('pdf')
-        ) {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        }
-        return networkResponse;
-      }).catch((error) => {
-        console.error("Fetch failed; returning offline page instead.", error);
-        return caches.match("/offline.html");
-      });
+      return fetch(event.request).then(networkResponse => {
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      }).catch(() => caches.match("/offline.html"));
     })
   );
 });
 
-// ACTIVATE - Clean old caches
+// Activate event - Delete old caches and activate new cache
 self.addEventListener("activate", (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -82,5 +107,6 @@ self.addEventListener("activate", (event) => {
       console.log("Cache cleanup complete.");
     })
   );
+  // Take control of open pages immediately (no need for reload)
   self.clients.claim();
 });

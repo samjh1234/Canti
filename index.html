@@ -187,7 +187,20 @@
     db.version(2).stores({
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
+    // Function to load all records on page load
+async function loadAllRecords() {
+  try {
+    const resultsBox = document.getElementById("results-box");
+    resultsBox.innerHTML = ''; // Clear any previous content
 
+    const allRecords = await db.lyrics.toArray(); // Get all records from the database
+    displayResults(allRecords, resultsBox); // Display the records using the existing displayResults function
+
+    console.log(`Loaded ${allRecords.length} records from the database.`);
+  } catch (error) {
+    console.error('Failed to load records on page load:', error);
+  }
+}
     // Function to populate the results-box dynamically
     async function populateResults(query = "") {
       const resultsBox = document.getElementById("results-box");

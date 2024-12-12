@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Cancella</title>
+  <!-- Favicon -->
+  <link rel="icon" href="photos/favicon.png" type="image/png">
+  <!-- Dexie.js -->
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: #cce7ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: #dff3ff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .arrow {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      display: inline-block;
+      border-left: 2px solid black;
+      border-bottom: 2px solid black;
+      transform: rotate(45deg);
+      cursor: pointer;
+    }
+
+    .arrow:hover {
+      border-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .title-container img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      color: #333;
+      text-align: center;
+    }
+
+    .search-box {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #bbb;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .list-box {
+      width: 100%;
+      height: 300px;
+      background: #fff;
+      border-radius: 15px;
+      border: 1px solid #bbb;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-box label {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: block;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .list-box input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .button {
+      flex: 1;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 0 5px;
+    }
+
+    .button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+    .delete-button {
+      background: rgba(255, 99, 71, 0.5);
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-button:hover {
+      background: rgba(255, 69, 0, 0.8);
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Title Section -->
+    <div class="title-container">
+      <a href="db-admin.html" style="display: flex; align-items: center; text-decoration: none;">
+        <span class="arrow"></span>
+        <img src="photos/logo.png" alt="Logo">
+      </a>
+      <div class="title">Cancella Records</div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Cerca Record" class="search-input">
+    </div>
+
+    <!-- List Box -->
+    <div class="list-box" id="list-box">
+      <!-- Dynamic records will be populated here -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-row">
+      <button id="select-all-button" class="button">Seleziona Tutto</button>
+      <button id="delete-button" class="button delete-button">Cancella Record</button>
+    </div>
+  </div>
+
+  <script>
+    const db = new Dexie("LyricsDatabase");
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+
+    // Populate the list box with all record titles
+    async function populateListBox() {
+      const listBox = document.getElementById('list-box');
+      listBox.innerHTML = '';
+      const records = await db.lyrics.toArray();
+
+      records.forEach(record => {
+        const label = document.createElement('label');
+        label.innerHTML = `
+          <input type="checkbox" class="record-checkbox" data-id="${record.id}">
+          ${record.title || 'Titolo Sconosciuto'}
+        `;
+        listBox.appendChild(label);
+      });
+    }
+
+    // Filter the list box based on the search input
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      const labels = document.querySelectorAll('#list-box label');
+      labels.forEach(label => {
+        const text = label.textContent.toLowerCase();
+        label.style.display = text.includes(query) ? 'block' : 'none';
+      });
+    });
+
+    // "Seleziona Tutto" Button
+    let isSelectAll = true;
+    document.getElementById('select-all-button').addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      checkboxes.forEach(checkbox => checkbox.checked = isSelectAll);
+      document.getElementById('select-all-button').textContent = isSelectAll ? 'Deselenzionare' : 'Seleziona Tutto';
+      isSelectAll = !isSelectAll;
+    });
+
+    // Listen for manual deselection to update "Seleziona Tutto" status
+    document.getElementById('list-box').addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.record-checkbox');
+      const allDeselected = Array.from(checkboxes).every(checkbox => !checkbox.checked);
+      if (allDeselected) {
+        isSelectAll = true;
+        document.getElementById('select-all-button').textContent = 'Seleziona Tutto';
+      }
+    });
+
+    // "Cancella Record" Button
+    document.getElementById('delete-button').addEventListener('click', async () => {
+      const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked'))
+        .map(checkbox => parseInt(checkbox.dataset.id));
+
+      if (selectedIds.length === 0) {
+        alert('Nessun record selezionato per la cancellazione.');
+        return;
+      }
+
+      const confirmation = confirm(`Sei sicuro di voler cancellare ${selectedIds.length} record?`);
+      if (!confirmation) return;
+
+      await db.lyrics.bulkDelete(selectedIds);
+      alert(`${selectedIds.length} record cancellati con successo.`);
+      populateListBox();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateListBox();
+    });
+  </script>
+
+</body>
+</html>

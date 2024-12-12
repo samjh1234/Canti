@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v10"; // Update version number to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v11"; // Update version number to invalidate old caches
 const urlsToCache = [
   "/", 
   "index.html",

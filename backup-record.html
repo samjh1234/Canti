@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#85C1DC">
+  <title>Record Details</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="photos/logo.png" type="image/png">
+  <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inria Serif', serif;
+      background: url('photos/backgroundfo.png') no-repeat center center/cover;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 360px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5px;
+      justify-content: space-between;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+    }
+
+    .title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 3px;
+  padding: 0 10px;
+}
+
+.icon-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px; /* Space between the icons */
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+    .title-container a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .arrow {
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      display: inline-block;
+      border-left: 2px solid black;
+      border-bottom: 1px solid black;
+      transform: rotate(45deg);
+      cursor: pointer;
+    }
+
+    .arrow:hover {
+      border-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .title-container img {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .text-box {
+  width: 100%;
+  height: 450px; /* Fixed height to avoid flex layout issues */
+  max-height: 450px; /* Ensures that the max height is set */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 10px; /* Add some padding to ensure the text is not touching the edges */
+  font-size: 1rem;
+  color: black;
+  text-align: center;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Disable horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+  display: block; /* Ensure layout issues from flex are resolved */
+  white-space: pre-wrap; /* Ensure line breaks are respected */
+  position: relative; /* Important for scroll containment */
+  margin-bottom: 5px;
+}
+
+    .notes-box {
+      width: 100%;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 5px;
+      font-size: 1rem;
+      color: black;
+      overflow-y: auto;
+      text-align: center;
+      white-space: pre-wrap;
+      margin-bottom: 5px;
+    }
+
+    .media-player {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 5px;
+      text-align: center;
+    }
+
+    .buttons-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.button {
+  background: rgba(133, 193, 220, 0.5);
+  border: none;
+  padding: 8px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 30%; /* Reduced to fit 3 buttons */
+}
+
+.button:hover {
+  background: rgba(133, 193, 220, 0.8);
+}
+
+    .fixed-text-top {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      font-family: 'Inria Serif', serif;
+      z-index: 10;
+    }
+
+    .fixed-text-bottom {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      font-family: 'Inria Serif', serif;
+      z-index: 10;
+    }
+
+    @media (orientation: landscape) {
+      body {
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
+      }
+
+      .container {
+        height: 80%;
+        max-height: 80%;
+      }
+
+      .text-box {
+        height: 300px;
+      }
+    }
+
+    .text-box img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed Top Text -->
+  <div class="fixed-text-top">Canti & Lyrics</div>
+
+  <div class="container">
+    <div class="title-container">
+      <a href="index.html">
+        <span class="arrow"></span>
+        <img src="photos/logo.png" alt="Logo">
+      </a>
+      <div class="icon-group">
+        <img id="copy-icon" src="photos/copy.png" alt="Copy" class="icon">
+        <img id="print-icon" src="photos/printer.png" alt="Printer" class="icon">
+      </div>
+    </div>
+
+    <div class="text-box" id="record-text">
+      <strong id="record-title">Titolo</strong>
+      <div id="record-content">Testo sarà mostrato qui</div>
+    </div>
+
+    <div class="notes-box" id="notes-box">Mostra le note qui</div>
+
+    <div class="media-player">
+      <audio controls id="audio-player" class="hidden"></audio>
+    </div>
+
+    <div class="buttons-row">
+      <button id="attachments" class="button">Allegati</button>
+      <button id="export-share" class="button" style="font-size: 0.7rem;">Condividi-JSON</button>
+      <a href="#" id="edit-link" class="button">Modifica</a>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Text -->
+  <div class="fixed-text-bottom">Lazzaro - S.Fiesole</div>
+
+  <script>
+    const db = new Dexie("LyricsDatabase");
+
+    db.version(2).stores({
+      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+    });
+
+    function getFileExtension(mimeType) {
+      const mimeMap = {
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "audio/m4a": ".m4a",
+        "audio/mp3": ".mp3",
+        "application/pdf": ".pdf",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx"
+      };
+      return mimeMap[mimeType] || "";
+    }
+
+    function makeLinksClickable(text) {
+      const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
+      return text.replace(urlRegex, (url) => {
+        const hyperlink = url.startsWith("http") ? url : `http://${url}`;
+        return `<a href="${hyperlink}" target="_blank">${url}</a>`;
+      });
+    }
+
+    async function loadRecord() {
+      const params = new URLSearchParams(window.location.search);
+      const recordId = parseInt(params.get("id"), 10);
+
+      const record = await db.lyrics.get(recordId);
+
+      document.getElementById("record-title").innerHTML = `${record.title} <span style="font-weight: normal;">(${record.category})</span>`;
+      const recordContent = document.getElementById("record-content");
+      recordContent.textContent = "";
+      recordContent.innerHTML = makeLinksClickable(record.text.replace(/\n/g, "<br>"));
+
+      const notesBox = document.getElementById("notes-box");
+      notesBox.textContent = "";
+      notesBox.innerHTML = makeLinksClickable((record.notes || "").replace(/\n/g, "<br>"));
+
+      if (record.audio) {
+        const audio = document.getElementById("audio-player");
+        audio.src = record.audio;
+        audio.classList.remove("hidden");
+      }
+
+      if (record.photo && record.photoType) {
+        const photoImg = document.createElement("img");
+        photoImg.src = record.photo;
+        photoImg.alt = "Photo";
+        photoImg.addEventListener("click", () => {
+          const base64Data = record.photo.split(",")[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: record.photoType });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, "_blank");
+        });
+        recordContent.appendChild(photoImg);
+      }
+
+      const attachmentsButton = document.getElementById("attachments");
+      const files = [];
+
+      if (record.doc && record.docType) {
+        files.push({
+          data: record.doc,
+          type: record.docType,
+          filename: `${record.title || "document"}${getFileExtension(record.docType)}`
+        });
+      }
+
+      if (files.length > 0) {
+        attachmentsButton.innerHTML = "Allegati &#10003;";
+        attachmentsButton.addEventListener("click", () => {
+          files.forEach(file => {
+            const base64Data = file.data.split(",")[1];
+            const link = document.createElement("a");
+            link.href = `data:${file.type};base64,${base64Data}`;
+            link.download = file.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          });
+        });
+      } else {
+        attachmentsButton.innerHTML = "Allegati &#10060;";
+        attachmentsButton.disabled = true;
+      }
+
+      document.getElementById("edit-link").href = `modifica.html?id=${recordId}`;
+    }
+
+    loadRecord();
+
+    function centerContainer() {
+      const container = document.querySelector(".container");
+      const containerRect = container.getBoundingClientRect();
+      const scrollX = containerRect.left + window.pageXOffset - (window.innerWidth - containerRect.width) / 2;
+      const scrollY = containerRect.top + window.pageYOffset - (window.innerHeight - containerRect.height) / 2;
+
+      window.scrollTo({
+        left: scrollX > 0 ? scrollX : 0,
+        top: scrollY > 0 ? scrollY : 0,
+        behavior: "auto",
+      });
+    }
+
+    window.addEventListener("load", centerContainer);
+    window.addEventListener("resize", centerContainer);
+
+
+    // Print function
+      document.addEventListener("DOMContentLoaded", () => {
+    const printIcon = document.getElementById("print-icon");
+
+    // Print Button Logic
+    printIcon.addEventListener("click", () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Extract the title, category, content, and notes
+      const titleElement = document.getElementById("record-title");
+      const title = titleElement.innerText.split('(')[0].trim(); // Extract title
+      const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
+      const content = document.getElementById("record-content").innerText.trim();
+      const notes = document.getElementById("notes-box").innerText.trim();
+
+      // Set font and alignment for title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const titleX = pageWidth / 2;
+      doc.text(title, titleX, 20, { align: 'center' });
+
+      // Set font and alignment for category
+      if (category) {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(12);
+        doc.text(`(${category})`, titleX, 30, { align: 'center' });
+      }
+
+      // Set font and alignment for content
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      const contentY = category ? 40 : 30; // If category exists, start content lower
+      const contentLines = doc.splitTextToSize(content, 180); // Ensure content wraps properly
+      let currentY = contentY;
+      contentLines.forEach((line) => {
+        if (currentY + 10 > pageHeight - 20) {
+          doc.addPage();
+          currentY = 20; // Reset Y on the new page
+        }
+        doc.text(line, pageWidth / 2, currentY, { align: 'center' });
+        currentY += 10;
+      });
+
+      // Export the photo if it exists
+      const photoImg = document.querySelector("#record-content img");
+      if (photoImg) {
+        const image = new Image();
+        image.src = photoImg.src;
+        image.onload = function () {
+          const aspectRatio = image.width / image.height;
+          const maxWidth = 180; // Max width for the image
+          const maxHeight = 100; // Max height for the image
+          let imageWidth = maxWidth;
+          let imageHeight = maxWidth / aspectRatio;
+
+          if (imageHeight > maxHeight) {
+            imageHeight = maxHeight;
+            imageWidth = maxHeight * aspectRatio;
+          }
+
+          const imageX = (pageWidth - imageWidth) / 2;
+          const imageY = currentY + 10; // Add some space after the content
+
+          // Check if there is enough space on the current page for the image
+          if (imageY + imageHeight > pageHeight - 20) {
+            doc.addPage();
+            currentY = 20; // Reset Y on the new page
+          }
+
+          doc.addImage(image.src, 'JPEG', imageX, currentY, imageWidth, imageHeight);
+
+          // Update Y position for notes
+          const noteStartY = currentY + imageHeight + 10;
+          addNotes(doc, notes, noteStartY);
+        };
+      } else {
+        addNotes(doc, notes, currentY + 10); // Add notes directly if no image
+      }
+
+      function addNotes(doc, notesContent, startY) {
+        if (notesContent) {
+          if (startY + 20 > pageHeight - 20) {
+            doc.addPage();
+            startY = 20;
+          }
+
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(12);
+          doc.text('Note:', pageWidth / 2, startY, { align: 'center' });
+          doc.setFont("helvetica", "normal");
+
+          const notesLines = doc.splitTextToSize(notesContent, 180);
+          let noteY = startY + 10; // Space below "Note:"
+          notesLines.forEach((line) => {
+            if (noteY + 10 > pageHeight - 20) {
+              doc.addPage();
+              noteY = 20; // Reset Y on the new page
+            }
+            doc.text(line, pageWidth / 2, noteY, { align: 'center' });
+            noteY += 10;
+          });
+        }
+
+        // Save the PDF
+        doc.save("record.pdf");
+      }
+    });
+  });
+  document.addEventListener("DOMContentLoaded", () => {
+  const copyIcon = document.getElementById("copy-icon");
+
+  copyIcon.addEventListener("click", async () => {
+    try {
+      const titleElement = document.getElementById("record-title");
+      const title = titleElement.innerText.split('(')[0].trim(); // Extract title
+      const category = titleElement.innerText.match(/\((.*?)\)/) ? titleElement.innerText.match(/\((.*?)\)/)[1] : ''; // Extract category
+      const content = document.getElementById("record-content").innerText.trim();
+
+      // Format the text to be copied
+      let textToCopy = `Title: ${title}\nCategory: ${category}\n\n${content}`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        // Use the clipboard API if supported
+        await navigator.clipboard.writeText(textToCopy);
+        alert("Title, category, and text have been copied to the clipboard!");
+      } else {
+        // Fallback for older browsers or insecure context (e.g., http)
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        textArea.style.position = "fixed"; // Avoid scrolling to the bottom
+        textArea.style.left = "-9999px";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            alert("Title, category, and text have been copied to the clipboard!");
+          } else {
+            alert("Failed to copy content. Please try again.");
+          }
+        } catch (err) {
+          console.error("Fallback copy failed:", err);
+          alert("Failed to copy content. Please try again.");
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error("Copy Error:", error);
+      alert("Failed to copy content. Please try again.");
+    }
+  });
+});
+     // export the record function
+
+     document.addEventListener("DOMContentLoaded", () => {
+
+// Export/Share functionality
+const exportShareButton = document.getElementById("export-share");
+
+exportShareButton.addEventListener("click", async () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const recordId = parseInt(params.get("id"), 10);
+    const record = await db.lyrics.get(recordId);
+
+    if (!record) {
+      alert("No record found to export.");
+      return;
+    }
+
+    // Create a standalone JSON object for the single record
+    const singleRecord = {
+      tableName: "lyrics",
+      data: record
+    };
+
+    // Convert to JSON string and create a downloadable file
+    const jsonString = JSON.stringify(singleRecord, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `record-${record.title.replace(/\s+/g, '_')}.json`; // Filename uses the title of the record
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+    alert("Record esportato come JSON con successo!");
+  } catch (error) {
+    console.error("Export Error:", error);
+    alert("Errore durante l'esportazione del record. Riprova.");
+  }
+});
+
+});
+  </script>
+</body>
+</html>

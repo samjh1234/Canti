@@ -46,12 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Extract text using Tesseract.js
         const extractedText = await extractTextWithTesseract(processedImage);
 
-        console.log('Extracted Text:', extractedText);
+        // **Show Extracted Text in a Popup**
+        alert(`Extracted Text: \n\n${extractedText}`);
 
-        // Optionally display the scanned image
-        outputImage.src = processedImage;
-        outputImage.style.maxWidth = '100%';
-        document.body.appendChild(outputImage); // Display the scanned image on the page
+        // **Highlight the Extracted Text on the Image**
+        displayTextOnImage(processedImage, extractedText);
         
       }, 3000); // Wait for 3 seconds to capture the frame
     } catch (error) {
@@ -90,9 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
           cv.Canny(blurred, edges, 75, 200);
 
           // Save the result back into an image
-          cv.imshow('canvasOutput', edges);
-
-          // Convert the image back to a data URL
           const canvas = document.createElement('canvas');
           cv.imshow(canvas, edges);
           const base64Data = canvas.toDataURL('image/png');
@@ -133,5 +129,38 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error extracting text with Tesseract:', error);
       return 'Error extracting text';
     }
+  }
+
+  /**
+   * Function to highlight extracted text on the image.
+   * This will overlay the extracted text on the image.
+   * 
+   * @param {string} imageDataURL - The base64 image URL.
+   * @param {string} extractedText - The extracted text to be displayed.
+   */
+  function displayTextOnImage(imageDataURL, extractedText) {
+    const img = new Image();
+    img.src = imageDataURL;
+    img.style.maxWidth = '100%';
+    img.style.border = '2px solid #00FF00'; // Highlight border around image
+
+    // Wait for image to load
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+
+      // Draw the original image
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Draw the extracted text on the image
+      ctx.font = '16px Arial';
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.8)'; // Highlighted text color
+      ctx.fillText(extractedText, 10, 30); // Position text at (10, 30)
+
+      // Add the canvas to the page
+      document.body.appendChild(canvas);
+    };
   }
 });

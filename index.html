@@ -184,32 +184,54 @@
   <script>
     const db = new Dexie("LyricsDatabase");
 
-    db.version(2).stores({
-      lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
-    });
+db.version(2).stores({
+  lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
+});
 
-    // Function to populate the results-box dynamically
-    async function populateResults(query = "") {
-      const resultsBox = document.getElementById("results-box");
-      resultsBox.innerHTML = '';
+async function checkAndUpdateDatabase() {
+  try {
+    const localCount = await db.lyrics.count();
+    console.log(`Local IndexedDB record count: ${localCount}`);
 
-      const results = query
-        ? await db.lyrics
-            .where('title')
-            .startsWithIgnoreCase(query)
-            .or('text')
-            .startsWithIgnoreCase(query)
-            .or('notes')
-            .startsWithIgnoreCase(query)
-            .or('category')
-            .startsWithIgnoreCase(query)
-            .toArray()
-        : await db.lyrics.toArray(); // If no query, fetch all records
+    let remoteData;
 
-      if (results.length === 0) {
-        resultsBox.textContent = 'Nessun risultato trovato';
+    try {
+      // Fetch the remote db.json file
+      const response = await fetch('db.json');
+      remoteData = await response.json();
+    } catch (error) {
+      console.warn('User is offline or fetch for db.json failed, using cache...');
+      const cache = await caches.open("lyrics-pwa-cache-v8");
+      const cachedResponse = await cache.match('db.json');
+      if (!cachedResponse) {
+        console.error('db.json not found in cache and network request failed.');
         return;
       }
+      remoteData = await cachedResponse.json();
+    }
+
+    const remoteCount = remoteData.data.tables.find(table => table.tableName === 'lyrics').rows.length;
+    console.log(`Remote JSON record count: ${remoteCount}`);
+
+    if (localCount !== remoteCount) {
+      console.log('Record counts differ. Updating local IndexedDB with remote db.json...');
+      await db.lyrics.clear(); // Clear local IndexedDB
+
+      const lyricsData = remoteData.data.tables.find(table => table.tableName === 'lyrics').rows;
+      await db.lyrics.bulkAdd(lyricsData); // Populate IndexedDB with fresh data
+
+      console.log('IndexedDB updated successfully with', lyricsData.length, 'records.');
+    } else {
+      console.log('Local database is up-to-date.');
+    }
+  } catch (error) {
+    console.error('Failed to update the database:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAndUpdateDatabase();
+});
 
       results.forEach(record => {
         const item = document.createElement('p');

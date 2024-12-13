@@ -188,39 +188,73 @@
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
 
-    // Function to populate the results-box dynamically
-    async function populateResults(query = "") {
-      const resultsBox = document.getElementById("results-box");
-      resultsBox.innerHTML = '';
+      // Function to populate the results-box dynamically
+  async function populateResults(query = "") {
+    const resultsBox = document.getElementById("results-box");
+    resultsBox.innerHTML = '';
 
-      const results = query
-        ? await db.lyrics
-            .where('title')
-            .startsWithIgnoreCase(query)
-            .or('text')
-            .startsWithIgnoreCase(query)
-            .or('notes')
-            .startsWithIgnoreCase(query)
-            .or('category')
-            .startsWithIgnoreCase(query)
-            .toArray()
-        : await db.lyrics.toArray(); // If no query, fetch all records
+    const results = query
+      ? await db.lyrics
+          .where('title')
+          .startsWithIgnoreCase(query)
+          .or('text')
+          .startsWithIgnoreCase(query)
+          .or('notes')
+          .startsWithIgnoreCase(query)
+          .or('category')
+          .startsWithIgnoreCase(query)
+          .toArray()
+      : await db.lyrics.toArray(); // If no query, fetch all records
 
-      if (results.length === 0) {
-        resultsBox.textContent = 'Nessun risultato trovato';
-        return;
-      }
-
-      results.forEach(record => {
-        const item = document.createElement('p');
-        item.textContent = record.title || 'Titolo sconosciuto';
-        item.addEventListener('click', () => {
-          window.location.href = `record.html?id=${record.id}`;
-        });
-        resultsBox.appendChild(item);
-      });
+    if (results.length === 0) {
+      resultsBox.textContent = 'Nessun risultato trovato';
+      return;
     }
 
+    results.forEach(record => {
+      const item = document.createElement('p');
+      item.textContent = record.title || 'Titolo sconosciuto';
+      item.addEventListener('click', () => {
+        window.location.href = `record.html?id=${record.id}`;
+      });
+      resultsBox.appendChild(item);
+    });
+  }
+
+  async function checkAndPopulateDatabase() {
+    try {
+      const recordsCount = await db.lyrics.count();
+      if (recordsCount === 0) {
+        console.log('Database is empty, populating from JSON file...');
+
+        // Fetch db.json from cache or network
+        const response = await fetch('db.json', { cache: 'force-cache' });
+        const data = await response.json();
+        
+        // Extract the data for the "lyrics" table
+        const lyricsData = data.data.data.find(table => table.tableName === 'lyrics').rows;
+
+        if (!lyricsData.length) {
+          throw new Error('No data found in the JSON file to populate the database.');
+        }
+
+        // Insert the data into the Dexie database
+        await db.lyrics.bulkAdd(lyricsData);
+        console.log('Database populated successfully with', lyricsData.length, 'records.');
+      } else {
+        console.log('Database already populated with', recordsCount, 'records.');
+      }
+    } catch (error) {
+      console.error('Failed to populate the database:', error);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkAndPopulateDatabase().then(() => {
+      // Populate all results after checking and populating the database
+      populateResults();
+    });
+  });
     // Search Input Handler
 document.getElementById("search-input").addEventListener('input', (e) => {
   const query = e.target.value.trim().toLowerCase();

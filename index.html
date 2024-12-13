@@ -322,42 +322,7 @@ function displayResults(results, resultsBox) {
 
     window.addEventListener("load", centerContainer);
     window.addEventListener("resize", centerContainer);
-
-    async function checkAndPopulateDatabase() {
-  try {
-    const recordsCount = await db.lyrics.count();
-    if (recordsCount === 0) {
-      console.log('Database is empty, populating from JSON file...');
-      
-      // Fetch the JSON file containing the pre-populated data
-      const response = await fetch('db.json');
-      const data = await response.json();
-
-      // Log the data to understand its structure
-      console.log('Full Data:', data);
-      console.log('Data.data:', data.data);
-      
-      // Extract the data for the "lyrics" table from the JSON structure
-      const lyricsData = data.data.data.find(table => table.tableName === 'lyrics').rows;
-
-      if (!lyricsData.length) {
-        throw new Error('No data found in the JSON file to populate the database.');
-      }
-
-      // Insert the data into the Dexie database
-      await db.lyrics.bulkAdd(lyricsData);
-      console.log('Database populated successfully with', lyricsData.length, 'records.');
-    } else {
-      console.log('Database already populated with', recordsCount, 'records.');
-    }
-  } catch (error) {
-    console.error('Failed to populate the database:', error);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  checkAndPopulateDatabase();
-});
+    
     if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('service-worker.js')

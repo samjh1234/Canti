@@ -5,6 +5,7 @@ const urlsToCache = [
   "scripts/dexie-export-import.min.js",
   "scripts/dexie.min.js",
   "scripts/jspdf.umd.min.js",
+  "fonts/Inria+Serif.css",
   "aggiungi.html", 
   "record.html", 
   "modifica.html", 

@@ -187,7 +187,7 @@
     db.version(2).stores({
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
-    
+
     // Function to populate the results-box dynamically
     async function populateResults(query = "") {
       const resultsBox = document.getElementById("results-box");

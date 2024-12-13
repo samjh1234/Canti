@@ -1,7 +1,10 @@
 const CACHE_NAME = "lyrics-pwa-cache-v3"; // Update version number to invalidate old caches
 const urlsToCache = [ 
   "index.html",
-  "db.json", // Cache db.json for offline use
+  "scripts/db.json", // Cache db.json for offline use
+  "scripts/dexie-export-import.min.js",
+  "scripts/dexie.min.js",
+  "scripts/jspdf.umd.min.js",
   "aggiungi.html", 
   "record.html", 
   "modifica.html", 

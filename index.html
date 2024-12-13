@@ -198,7 +198,7 @@
         console.log('Database is empty, populating from JSON file...');
 
         // Fetch db.json from cache or network
-        const response = await fetch('db.json', { cache: 'force-cache' });
+        const response = await fetch('scripts/db.json', { cache: 'force-cache' });
         const data = await response.json();
         
         // Extract the data for the "lyrics" table

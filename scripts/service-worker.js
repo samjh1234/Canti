@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v3"; // Update version number to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number to invalidate old caches
 const urlsToCache = [ 
   "index.html",
   "scripts/db.json", // Cache db.json for offline use

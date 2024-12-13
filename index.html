@@ -329,16 +329,23 @@ function displayResults(results, resultsBox) {
     // Service worker
     
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('scripts/service-worker.js')
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-    });
-  }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+
+    // Request Persistent Storage
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(granted => {
+        console.log(granted ? 'Persistent storage granted' : 'Persistent storage denied');
+      });
+    }
+  });
+}
   </script>
 <div class="fixed-text">Lazzaro - S.Fiesole</div>
 </body>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v11"; // Update version number to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v12"; // Update version number to invalidate old caches
 const urlsToCache = [
   "/", 
   "index.html",
@@ -15,7 +15,7 @@ const urlsToCache = [
   "photos/printer.png", 
   "photos/copy.png", 
   "manifest.json", 
-  "offline.html" // This file should exist to display an offline message
+  "offline.html" // Ensure this file exists to display offline fallback message
 ];
 
 // Install event - Cache core files
@@ -34,22 +34,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Handle requests for record.html to ensure it works offline
-  if (url.pathname.includes('record.html')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-        .catch(() => caches.match(event.request)) // Serve from cache if network fails
-    );
-    return;
-  }
-
-  // Handle requests for db.json - Use cache-first strategy
+  // Handle requests for db.json - Cache-first strategy
   if (url.pathname.includes('db.json')) {
     event.respondWith(
       caches.match(event.request).then((response) => {
@@ -57,18 +42,16 @@ self.addEventListener("fetch", (event) => {
           console.log("Serving db.json from cache");
           return response; // Serve from cache
         }
-        return fetch(event.request)
-          .then(networkResponse => {
-            return caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, networkResponse.clone());
-              console.log("db.json cached for offline use");
-              return networkResponse;
-            });
-          })
-          .catch((error) => {
-            console.error("Failed to fetch db.json:", error);
-            return caches.match("/offline.html"); // Fallback to offline page if available
+        return fetch(event.request).then(networkResponse => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+            console.log("db.json cached for offline use");
+            return networkResponse;
           });
+        }).catch((error) => {
+          console.error("Failed to fetch db.json:", error);
+          return caches.match("/offline.html"); // Fallback to offline page if available
+        });
       })
     );
     return;

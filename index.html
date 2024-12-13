@@ -322,6 +322,8 @@ function displayResults(results, resultsBox) {
 
     window.addEventListener("load", centerContainer);
     window.addEventListener("resize", centerContainer);
+
+    // Service worker
     
     if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

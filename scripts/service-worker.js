@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v5"; // Update version to invalidate old caches
 
 const urlsToCache = [ 
   "index.html",
@@ -27,7 +27,20 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Opened cache and caching files...");
-      return cache.addAll(urlsToCache);
+      return Promise.all(
+        urlsToCache.map(async (url) => {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`HTTP Error: ${response.status} for ${url}`);
+            }
+            await cache.put(url, response);
+            console.log(`Successfully cached: ${url}`);
+          } catch (error) {
+            console.error(`Failed to cache: ${url} - ${error.message}`);
+          }
+        })
+      );
     }).catch((error) => {
       console.error("Cache install failed:", error);
     })
@@ -36,32 +49,6 @@ self.addEventListener("install", (event) => {
 
 // Fetch event - Cache then network strategy
 self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
-
-  // Handle requests for /scripts/db.json - Cache-first strategy
-  if (url.pathname.includes('/scripts/db.json')) {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        if (response) {
-          console.log("Serving /scripts/db.json from cache");
-          return response; // Serve from cache
-        }
-        return fetch(event.request).then(networkResponse => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
-            console.log("/scripts/db.json cached for offline use");
-            return networkResponse;
-          });
-        }).catch((error) => {
-          console.error("Failed to fetch /scripts/db.json:", error);
-          return caches.match("offline.html"); // Fallback to offline page if available
-        });
-      })
-    );
-    return;
-  }
-
-  // For all other files, serve them from cache first, then fallback to network
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
@@ -72,7 +59,7 @@ self.addEventListener("fetch", (event) => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         });
-      }).catch(() => caches.match("offline.html")); // Corrected offline.html path
+      }).catch(() => caches.match("offline.html")); 
     })
   );
 });
@@ -94,6 +81,5 @@ self.addEventListener("activate", (event) => {
       console.log("Cache cleanup complete.");
     })
   );
-  // Take control of open pages immediately (no need for reload)
   self.clients.claim();
 });

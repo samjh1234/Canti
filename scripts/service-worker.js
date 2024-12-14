@@ -22,39 +22,43 @@ const urlsToCache = [
   "https://samjh1234.github.io/canti/offline.html" // Ensure this file exists for offline fallback
 ];
 
-//  **Install event - Cache core files**
+// Install event - Cache core files
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    }).catch((error) => {
-      console.error("Cache install failed:", error);
+      return Promise.all(
+        urlsToCache.map(async (url) => {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to fetch: ${url}`);
+            await cache.put(url, response.clone());
+          } catch (error) {
+            console.error(`Failed to cache: ${url} - ${error.message}`);
+          }
+        })
+      );
     })
   );
 });
 
-//  **Fetch event - Cache-first strategy for assets, network-first for dynamic content**
+// Fetch event - Cache-first strategy for assets, network-first for dynamic content
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Return from cache if available
       if (response) {
-        return response; 
+        return response; // Serve from cache
       }
-      
-      // Fetch from network if not in cache
       return fetch(event.request).then(networkResponse => {
-        // Cache the fetched response
         return caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         });
-      }).catch(() => caches.match("https://samjh1234.github.io/canti/offline.html")); // Fallback to offline page
+      }).catch(() => caches.match("https://samjh1234.github.io/canti/offline.html")); 
     })
   );
 });
 
-//  **Activate event - Delete old caches**
+// Activate event - Delete old caches
 self.addEventListener("activate", (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -68,6 +72,5 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-  // Take control of open pages immediately
   self.clients.claim();
 });

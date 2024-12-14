@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v5"; // Update version to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v6"; // Update version to invalidate old caches
 
 const urlsToCache = [ 
   "https://samjh1234.github.io/canti/index.html",
@@ -19,52 +19,42 @@ const urlsToCache = [
   "https://samjh1234.github.io/canti/photos/printer.png", 
   "https://samjh1234.github.io/canti/photos/copy.png", 
   "https://samjh1234.github.io/canti/manifest.json", 
-  "https://samjh1234.github.io/canti/offline.html" // Make sure this file exists for offline fallback
+  "https://samjh1234.github.io/canti/offline.html" // Ensure this file exists for offline fallback
 ];
 
-// Install event - Cache core files
+//  **Install event - Cache core files**
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache and caching files...");
-      return Promise.all(
-        urlsToCache.map(async (url) => {
-          try {
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`HTTP Error: ${response.status} for ${url}`);
-            }
-            await cache.put(url, response);
-            console.log(`Successfully cached: ${url}`);
-          } catch (error) {
-            console.error(`Failed to cache: ${url} - ${error.message}`);
-          }
-        })
-      );
+      return cache.addAll(urlsToCache);
     }).catch((error) => {
       console.error("Cache install failed:", error);
     })
   );
 });
 
-// Fetch event - Cache then network strategy
+//  **Fetch event - Cache-first strategy for assets, network-first for dynamic content**
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
+      // Return from cache if available
       if (response) {
-        return response; // Serve from cache
+        return response; 
       }
+      
+      // Fetch from network if not in cache
       return fetch(event.request).then(networkResponse => {
+        // Cache the fetched response
         return caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         });
-      }).catch(() => caches.match("offline.html")); 
+      }).catch(() => caches.match("https://samjh1234.github.io/canti/offline.html")); // Fallback to offline page
     })
   );
 });
 
-// Activate event - Delete old caches and activate new cache
+//  **Activate event - Delete old caches**
 self.addEventListener("activate", (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -72,14 +62,12 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (!cacheWhitelist.includes(cacheName)) {
-            console.log(`Deleting outdated cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      console.log("Cache cleanup complete.");
     })
   );
+  // Take control of open pages immediately
   self.clients.claim();
 });

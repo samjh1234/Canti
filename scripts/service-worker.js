@@ -7,19 +7,19 @@ const urlsToCache = [
   "https://samjh1234.github.io/canti/scripts/dexie.min.js",
   "https://samjh1234.github.io/canti/scripts/jspdf.umd.min.js",
   "https://samjh1234.github.io/canti/fonts/Inria+Serif.css",
-  "aggiungi.html", 
-  "record.html", 
-  "modifica.html", 
-  "db-admin.html",
-  "cancella.html",
-  "photos/favicon.png", 
-  "photos/logo.png", 
-  "photos/icon-512x512.png", 
-  "photos/backgroundfo.png", 
-  "photos/printer.png", 
-  "photos/copy.png", 
-  "manifest.json", 
-  "offline.html" // Make sure this file exists for offline fallback
+  "https://samjh1234.github.io/canti/aggiungi.html", 
+  "https://samjh1234.github.io/canti/record.html", 
+  "https://samjh1234.github.io/canti/modifica.html", 
+  "https://samjh1234.github.io/canti/db-admin.html",
+  "https://samjh1234.github.io/canti/cancella.html",
+  "https://samjh1234.github.io/canti/photos/favicon.png", 
+  "https://samjh1234.github.io/canti/photos/logo.png", 
+  "https://samjh1234.github.io/canti/photos/icon-512x512.png", 
+  "https://samjh1234.github.io/canti/photos/backgroundfo.png", 
+  "https://samjh1234.github.io/canti/photos/printer.png", 
+  "https://samjh1234.github.io/canti/photos/copy.png", 
+  "https://samjh1234.github.io/canti/manifest.json", 
+  "https://samjh1234.github.io/canti/offline.html" // Make sure this file exists for offline fallback
 ];
 
 // Install event - Cache core files

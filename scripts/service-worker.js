@@ -1,4 +1,4 @@
-const CACHE_NAME = "lyrics-pwa-cache-v6"; // Update version to invalidate old caches
+const CACHE_NAME = "lyrics-pwa-cache-v7"; // Update version to invalidate old caches
 
 const urlsToCache = [ 
   "https://samjh1234.github.io/canti/index.html",

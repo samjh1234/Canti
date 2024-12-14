@@ -1,4 +1,5 @@
 const CACHE_NAME = "lyrics-pwa-cache-v4"; // Update version number to invalidate old caches
+
 const urlsToCache = [ 
   "index.html",
   "scripts/db.json", // Cache db.json for offline use
@@ -18,7 +19,7 @@ const urlsToCache = [
   "photos/printer.png", 
   "photos/copy.png", 
   "manifest.json", 
-  "offline.html" // Ensure this file exists to display offline fallback message
+  "offline.html" // Make sure this file exists for offline fallback
 ];
 
 // Install event - Cache core files
@@ -37,23 +38,23 @@ self.addEventListener("install", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Handle requests for db.json - Cache-first strategy
-  if (url.pathname.includes('db.json')) {
+  // Handle requests for /scripts/db.json - Cache-first strategy
+  if (url.pathname.includes('/scripts/db.json')) {
     event.respondWith(
       caches.match(event.request).then((response) => {
         if (response) {
-          console.log("Serving db.json from cache");
+          console.log("Serving /scripts/db.json from cache");
           return response; // Serve from cache
         }
         return fetch(event.request).then(networkResponse => {
           return caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, networkResponse.clone());
-            console.log("db.json cached for offline use");
+            console.log("/scripts/db.json cached for offline use");
             return networkResponse;
           });
         }).catch((error) => {
-          console.error("Failed to fetch db.json:", error);
-          return caches.match("/offline.html"); // Fallback to offline page if available
+          console.error("Failed to fetch /scripts/db.json:", error);
+          return caches.match("offline.html"); // Fallback to offline page if available
         });
       })
     );
@@ -71,7 +72,7 @@ self.addEventListener("fetch", (event) => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         });
-      }).catch(() => caches.match("/offline.html"));
+      }).catch(() => caches.match("offline.html")); // Corrected offline.html path
     })
   );
 });

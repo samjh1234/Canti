@@ -193,26 +193,46 @@
     });
       // Function to check if db empty or not and download JSON db from site if local db is empty
     async function checkAndPopulateDatabase() {
-    try {
-      const recordsCount = await db.lyrics.count();
-      if (recordsCount === 0) {
-        console.log('Database is empty, populating from JSON file...');
+  try {
+    const recordsCount = await db.lyrics.count();
+    if (recordsCount === 0) {
+      console.log('Database is empty, populating from JSON file...');
+      
+      // Fetch db.json from cache or network
+      const response = await fetch('scripts/db.json', { cache: 'force-cache' });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch db.json: ${response.status} ${response.statusText}`);
+      }
 
-        // Fetch db.json from cache or network
-        const response = await fetch('scripts/db.json', { cache: 'force-cache' });
-        let data;
-            try {
-              data = await response.json();
-            } catch (error) {
-              console.error('Failed to parse JSON from db.json:', error);
-              return;
-            }
-        
-        // Extract the data for the "lyrics" table
-        const table = data?.data?.data?.find(table => table.tableName === 'lyrics');
-        if (!table || !table.rows || !table.rows.length) {
-          throw new Error('No data found in the JSON file to populate the database.');
-        }
+      const data = await response.json();
+      
+      // Log the entire JSON response to understand its structure
+      console.log('Full Data:', data);
+      
+      // Defensive check to ensure proper path to the data
+      const table = data?.data?.data?.find(table => table.tableName === 'lyrics');
+      
+      if (!table) {
+        throw new Error('Lyrics table not found in the JSON file.');
+      }
+
+      const lyricsData = table.rows;
+
+      if (!lyricsData || !Array.isArray(lyricsData) || lyricsData.length === 0) {
+        throw new Error('No data found in the lyrics table from the JSON file.');
+      }
+
+      // Insert the data into the Dexie database
+      await db.lyrics.bulkAdd(lyricsData);
+      console.log('Database populated successfully with', lyricsData.length, 'records.');
+    } else {
+      console.log('Database already populated with', recordsCount, 'records.');
+    }
+  } catch (error) {
+    console.error('Failed to populate the database:', error);
+  }
+}
 
         // Insert the data into the Dexie database
         await db.lyrics.bulkAdd(lyricsData);

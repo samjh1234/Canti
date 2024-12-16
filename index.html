@@ -15,6 +15,7 @@
   <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
   -->
   <script src="scripts/dexie.min.js"></script>
+  <script src="scripts/service-worker.js"></script>
   <!-- Inline Styles -->
   <style>
     @import url('fonts/Inria+Serif.css');
@@ -199,12 +200,17 @@
 
         // Fetch db.json from cache or network
         const response = await fetch('scripts/db.json', { cache: 'force-cache' });
-        const data = await response.json();
+        let data;
+            try {
+              data = await response.json();
+            } catch (error) {
+              console.error('Failed to parse JSON from db.json:', error);
+              return;
+            }
         
         // Extract the data for the "lyrics" table
-        const lyricsData = data.data.data.find(table => table.tableName === 'lyrics').rows;
-
-        if (!lyricsData.length) {
+        const table = data?.data?.data?.find(table => table.tableName === 'lyrics');
+        if (!table || !table.rows || !table.rows.length) {
           throw new Error('No data found in the JSON file to populate the database.');
         }
 

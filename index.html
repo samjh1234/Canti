@@ -192,15 +192,16 @@
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
       // Function to check if db empty or not and download JSON db from site if local db is empty
-    async function checkAndPopulateDatabase() {
+    // Function to check if db is empty and download JSON db from site if local db is empty
+async function checkAndPopulateDatabase() {
   try {
     const recordsCount = await db.lyrics.count();
     if (recordsCount === 0) {
       console.log('Database is empty, populating from JSON file...');
-      
+
       // Fetch db.json from cache or network
       const response = await fetch('scripts/db.json', { cache: 'force-cache' });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch db.json: ${response.status} ${response.statusText}`);
       }
@@ -234,23 +235,12 @@
   }
 }
 
-        // Insert the data into the Dexie database
-        await db.lyrics.bulkAdd(lyricsData);
-        console.log('Database populated successfully with', lyricsData.length, 'records.');
-      } else {
-        console.log('Database already populated with', recordsCount, 'records.');
-      }
-    } catch (error) {
-      console.error('Failed to populate the database:', error);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    checkAndPopulateDatabase().then(() => {
-      // Populate all results after checking and populating the database
-      populateResults();
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  checkAndPopulateDatabase().then(() => {
+    // Populate all results after checking and populating the database
+    populateResults();
   });
+});
       // Function to populate the results-box dynamically
   async function populateResults(query = "") {
     const resultsBox = document.getElementById("results-box");

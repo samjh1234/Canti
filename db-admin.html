@@ -131,26 +131,56 @@
     });
 
     // Backup Database
-    document.getElementById("backup-btn").addEventListener("click", async () => {
-      try {
-        const blob = await db.export();
-        const url = URL.createObjectURL(blob);
+document.getElementById("backup-btn").addEventListener("click", async () => {
+  try {
+    // Export the database
+    const backup = await db.export();
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "backup.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    // Parse the backup blob to JSON
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      let data = JSON.parse(e.target.result);
 
-        URL.revokeObjectURL(url);
-
-        alert("Backup completed successfully!");
-      } catch (error) {
-        console.error("Backup Error:", error);
-        alert("Backup failed. Please try again.");
+      // Remove duplicates from the lyrics table
+      if (data && data.data && data.data.data) {
+        const lyricsTable = data.data.data.find(table => table.tableName === 'lyrics');
+        
+        if (lyricsTable && lyricsTable.rows) {
+          // Remove duplicates by using a Map where the key is the ID
+          const uniqueRowsMap = new Map();
+          lyricsTable.rows.forEach(row => {
+            if (!uniqueRowsMap.has(row.id)) {
+              uniqueRowsMap.set(row.id, row);
+            }
+          });
+          
+          // Replace the old rows with the unique rows
+          lyricsTable.rows = Array.from(uniqueRowsMap.values());
+        }
       }
-    });
+
+      // Create a new Blob with the updated, cleaned data
+      const cleanedBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+      const url = URL.createObjectURL(cleanedBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+
+      alert("Backup completed successfully without duplicate keys!");
+    };
+
+    reader.readAsText(backup);
+  } catch (error) {
+    console.error("Backup Error:", error);
+    alert("Backup failed. Please try again.");
+  }
+});
 
 // Restore Database with Chunked Importing
 document.getElementById("restore-btn").addEventListener("click", () => {

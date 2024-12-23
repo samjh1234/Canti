@@ -280,13 +280,7 @@ document.getElementById("search-input").addEventListener('input', (e) => {
   const query = e.target.value.trim().toLowerCase();
   populateResults(query);
 });
-/*
-// "Cerca" Button Handler
-document.getElementById("search-button").addEventListener('click', () => {
-  const query = document.getElementById("search-input").value.trim().toLowerCase();
-  populateResults(query || ""); // Show all if the input is empty
-});
-*/
+
 // Enhanced populateResults function with partial match support
 async function populateResults(query = "") {
   const resultsBox = document.getElementById("results-box");

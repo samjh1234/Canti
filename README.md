@@ -1,2 +1,2 @@
-# pwa
+# pwa app
 Lyrics app

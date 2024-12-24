@@ -152,6 +152,33 @@
       color: white;
     }
 
+    .down-buttons {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .down-button {
+      flex: 1;
+      margin: 0 5px;
+      background: rgba(133, 193, 220, 0.5);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .down-button:hover {
+      background: rgba(133, 193, 220, 0.8);
+      color: white;
+    }
+
+/*
     .save-buttons-container {
       display: flex;
       justify-content: space-between;
@@ -203,6 +230,8 @@
     .delete-button:hover {
       background: rgba(255, 69, 0, 0.8);
     }
+*/
+
 
     @media (orientation: landscape) {
       body {
@@ -257,10 +286,10 @@
       </label>
     </div>
 
-    <div class="save-buttons-container">
-      <button id="save" class="save-button">Salva</button>
-      <button id="delete" class="delete-button">Elimina</button>
-      <a id="indietro" class="indietro-button" style="text-align: center; text-decoration: none;">Indietro</a>
+    <div class="down-buttons">
+      <button id="save" class="down-button">Salva</button>
+      <button id="delete" class="down-button">Elimina</button>
+      <a id="indietro" class="down-button" style="text-align: center; text-decoration: none;">Indietro</a>
     </div>
   </div>
 

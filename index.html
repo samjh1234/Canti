@@ -244,7 +244,7 @@
     db.version(2).stores({
       lyrics: "++id, category, title, text, notes, photo, photoType, audio, audioType, doc, docType"
     });
-      // Function to check if db empty or not and download JSON db from site if local db is empty
+    
     // Function to check if db is empty and download JSON db from site if local db is empty
 async function checkAndPopulateDatabase() {
   try {
@@ -261,9 +261,11 @@ async function checkAndPopulateDatabase() {
 
       const data = await response.json();
       
+      /*
       // Log the entire JSON response to understand its structure
       console.log('Full Data:', data);
-      
+      */
+
       // Defensive check to ensure proper path to the data
       const table = data?.data?.data?.find(table => table.tableName === 'lyrics');
       
@@ -389,9 +391,7 @@ function displayResults(results, resultsBox) {
     window.addEventListener("load", centerContainer);
     window.addEventListener("resize", centerContainer);
 
-    // Service worker
-    
-    
+  // Service worker
   // Request Persistent Storage
   if (navigator.storage && navigator.storage.persist) {
     navigator.storage.persist().then(granted => {

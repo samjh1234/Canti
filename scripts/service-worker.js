@@ -6,7 +6,6 @@ const urlsToCache = [
   "https://samjh1234.github.io/canti/scripts/dexie-export-import.min.js",
   "https://samjh1234.github.io/canti/scripts/dexie.min.js",
   "https://samjh1234.github.io/canti/scripts/jspdf.umd.min.js",
-  "https://samjh1234.github.io/canti/fonts/Inria+Serif.css",
   "https://samjh1234.github.io/canti/aggiungi.html", 
   "https://samjh1234.github.io/canti/record.html", 
   "https://samjh1234.github.io/canti/modifica.html", 
@@ -19,7 +18,12 @@ const urlsToCache = [
   "https://samjh1234.github.io/canti/photos/printer.png", 
   "https://samjh1234.github.io/canti/photos/copy.png", 
   "https://samjh1234.github.io/canti/manifest.json", 
-  "https://samjh1234.github.io/canti/offline.html" // Ensure this file exists for offline fallback
+  "https://samjh1234.github.io/canti/offline.html",
+  "https://samjh1234.github.io/canti/fonts/Inria+Serif.css",
+  "https://samjh1234.github.io/canti/fonts/fC1lPYxPY3rXxEndZJAzN3Sldy3vrFClUmU.woff2",
+  "https://samjh1234.github.io/canti/fonts/fC1lPYxPY3rXxEndZJAzN3Srdy3vrFCl.woff2",
+  "https://samjh1234.github.io/canti/fonts/fC14PYxPY3rXxEndZJAzN3wQUjjMjl2PaGxM8_E.woff2",
+  "https://samjh1234.github.io/canti/fonts/fC14PYxPY3rXxEndZJAzN3wQUjjCjl2PaGxM.woff2"
 ];
 
 // Install event - Cache core files

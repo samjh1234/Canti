@@ -178,6 +178,22 @@
       color: white;
     }
 
+    .delete-button {
+      background: rgba(255, 99, 71, 0.5);
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-button:hover {
+      background: rgba(255, 69, 0, 0.8);
+    }
 /*
     .save-buttons-container {
       display: flex;
@@ -288,7 +304,7 @@
 
     <div class="down-buttons">
       <button id="save" class="down-button">Salva</button>
-      <button id="delete" class="down-button">Elimina</button>
+      <button id="delete" class="delete-button">Elimina</button>
       <a id="indietro" class="down-button" style="text-align: center; text-decoration: none;">Indietro</a>
     </div>
   </div>

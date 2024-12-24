@@ -79,20 +79,16 @@
       text-decoration: none;
     }
 
-    .arrow {
-      width: 10px;
-      height: 10px;
-      margin-right: 5px;
-      display: inline-block;
-      border-left: 2px solid black;
-      border-bottom: 1px solid black;
-      color: black;
-      font-size: 1rem;
-    }
+    .home-icon {
+  width: 24px; /* Set the size to match the printer and copy icons */
+  height: 24px;
+  margin-right: 5px; /* Keep consistent spacing */
+  cursor: pointer;
+}
 
-    .arrow:hover {
-      border-color: rgba(0, 0, 0, 0.7);
-    }
+.home-icon:hover {
+  opacity: 0.7; /* Add a hover effect similar to the arrow's hover effect */
+}
 
     .title-container img {
       width: 20px;
@@ -222,8 +218,8 @@
   -->
   <div class="container">
     <div class="title-container">
-      <a href="index.html">
-        <span class="arrow">&#8962;</span>
+      <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
+        <img src="photos/home.png" alt="Home" class="home-icon">
       </a>
       <div class="icon-group">
         <img id="copy-icon" src="photos/copy.png" alt="Copy" class="icon">

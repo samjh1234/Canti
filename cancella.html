@@ -49,20 +49,16 @@
       margin-bottom: 10px;
     }
 
-    .arrow {
-      width: 20px;
-      height: 20px;
-      margin-right: 5px;
-      display: inline-block;
-      border-left: 2px solid black;
-      border-bottom: 2px solid black;
-      transform: rotate(45deg);
-      cursor: pointer;
-    }
+    .home-icon {
+  width: 24px; /* Set the size to match the printer and copy icons */
+  height: 24px;
+  margin-right: 5px; /* Keep consistent spacing */
+  cursor: pointer;
+}
 
-    .arrow:hover {
-      border-color: rgba(0, 0, 0, 0.7);
-    }
+.home-icon:hover {
+  opacity: 0.7; /* Add a hover effect similar to the arrow's hover effect */
+}
 
     .title-container img {
       width: 40px;
@@ -165,8 +161,8 @@
   <div class="container">
     <!-- Title Section -->
     <div class="title-container">
-      <a href="db-admin.html" style="display: flex; align-items: center; text-decoration: none;">
-        <span class="arrow"></span>
+      <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
+        <img src="photos/home.png" alt="Home" class="home-icon">
       </a>
       <div class="title">Cancella Records</div>
     </div>
